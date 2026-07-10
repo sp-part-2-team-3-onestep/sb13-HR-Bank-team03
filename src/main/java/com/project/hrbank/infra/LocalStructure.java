@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 @Component
-@ConditionalOnProperty(prefix = "hrbank.infra.type", havingValue = "local")
+@ConditionalOnProperty(name = "hrbank.infra.type", havingValue = "local")
 public class LocalStructure implements Structure {
 
     @Value("${hrbank.infra.local.root-path:./storage}")
