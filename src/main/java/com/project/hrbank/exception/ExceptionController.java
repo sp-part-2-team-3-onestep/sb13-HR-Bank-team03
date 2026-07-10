@@ -17,15 +17,15 @@ public class ExceptionController {
 
 
     // status code - 400 error
-//    @ExceptionHandler({
-//
-//    })
-//    public ProblemDetail BadRequestException(BaseException e, WebRequest request) {
-//        ProblemDetail pd = ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
-//        pd.setProperty("message", e.getMessage());
-//        pd.setProperty("timestamp", e.timestamp().toString());
-//        return pd;
-//    }
+    @ExceptionHandler({
+        DepartmentExisted.class
+    })
+    public ProblemDetail BadRequestException(BaseException e, WebRequest request) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
+        pd.setProperty("message", e.getMessage());
+        pd.setProperty("timestamp", e.timestamp().toString());
+        return pd;
+    }
 //
 //
 //    // status code - 404 error
