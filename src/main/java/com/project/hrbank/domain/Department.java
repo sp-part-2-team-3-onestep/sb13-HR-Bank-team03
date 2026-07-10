@@ -21,11 +21,11 @@ public class Department extends Base {
     private String departmentName;
 
     // 부서 설명란
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     // 부서 설립일
-    @Column
+    @Column(nullable = false)
     private LocalDate establishedDate;
 
     // 부서 삭제 날짜와 시간
