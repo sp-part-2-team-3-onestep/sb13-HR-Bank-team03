@@ -1,6 +1,7 @@
 package com.project.hrbank.service.basic;
 
 
+import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeStatus;
 import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.service.EmployeeService;
@@ -25,5 +26,13 @@ public class BasicEmployeeService implements EmployeeService {
                 : (from != null ? Instant.now() : null);
 
         return employeeRepository.countByStatusAndHireDateRange(status, from, to);
+    }
+
+    @Override
+    public void deleteEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("직원을 찾을 수 없습니다. ID: " + id));
+
+        employeeRepository.delete(employee);
     }
 }

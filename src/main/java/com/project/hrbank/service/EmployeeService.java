@@ -7,4 +7,6 @@ import java.time.LocalDate;
 public interface EmployeeService {
 
     long countEmployees(EmployeeStatus status, LocalDate fromDate, LocalDate toDate);
+
+    void deleteEmployee(Long id);
 }

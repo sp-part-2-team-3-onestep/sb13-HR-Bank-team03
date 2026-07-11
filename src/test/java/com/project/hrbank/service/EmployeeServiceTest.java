@@ -1,5 +1,6 @@
 package com.project.hrbank.service;
 
+import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeStatus;
 import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.service.basic.BasicEmployeeService;
@@ -11,17 +12,18 @@ import org.mockito.Mock;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
@@ -84,4 +86,27 @@ class EmployeeServiceTest {
         verify(employeeRepository).countByStatusAndHireDateRange(
                 null, null, Instant.parse("2024-02-01T00:00:00Z"));
     }
+
+    @Test
+    @DisplayName("존재하는 id면 delete 호출 O")
+    void deleteEmployee_success() {
+        Employee employee = mock(Employee.class);
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+
+        employeeService.deleteEmployee(1L);
+
+        verify(employeeRepository).delete(employee);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 id면 delete 호출 X")
+    void deleteEmployee_notFound() {
+        when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> employeeService.deleteEmployee(1L))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(employeeRepository, never()).delete(any());
+    }
+
 }
