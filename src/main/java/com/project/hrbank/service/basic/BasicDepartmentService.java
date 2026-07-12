@@ -1,6 +1,5 @@
 package com.project.hrbank.service.basic;
 
-
 import com.project.hrbank.domain.Department;
 import com.project.hrbank.dto.request.DepartmentCreateRequest;
 import com.project.hrbank.dto.request.DepartmentUpdateRequest;
@@ -9,6 +8,7 @@ import com.project.hrbank.exception.DepartmentNameDuplicateException;
 import com.project.hrbank.exception.DepartmentNotExistException;
 import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.DepartmentRepository;
+import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,9 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 @Slf4j
 public class BasicDepartmentService implements DepartmentService {
+
     private final DepartmentRepository departmentRepository;
+    private final EmployeeRepository employeeRepository;
     private final DtoMapper mapper;
 
     public DepartmentDto create(DepartmentCreateRequest request){
@@ -42,9 +44,8 @@ public class BasicDepartmentService implements DepartmentService {
         );
     }
 
-
-    // Todo - employee 카운터 조회 매서드 Employee 레포지토리에 추가. dto 벼니환 매서드에 파라매ㅓ로 추가
-    // Todo - localdatetime 변환시 값이 어도 에러가 나지 않도록 수정.
+    // Todo - employee 카운터 조회 매서드 Employee 레포지토리에 추가. dto 변환 매서드에 파라매터로 추가
+    // Todo - localdatetime 변환시 값이 없어도 에러가 나지 않도록 수정.
     public DepartmentDto update(Long id, DepartmentUpdateRequest request){
         String newName = request.name();
         String newDescription = request.description();
@@ -61,9 +62,16 @@ public class BasicDepartmentService implements DepartmentService {
         if (newDate != null) department.setEstablishedDate(newDate);
 
 
-
-
         return mapper.toDto(departmentRepository.save(department),0);
+    }
+  
+    @Override
+    public DepartmentDto findById(Long id) {
+        Department department = getEntityOrExcept(id);
+      
+        long employeeCount = employeeRepository.countByDepartment_Id(id);
+
+        return mapper.toDto(department, Math.toIntExact(employeeCount));
     }
 
 

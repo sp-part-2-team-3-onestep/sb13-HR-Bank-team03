@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping({"/api/departments"})
 @RequiredArgsConstructor
@@ -33,6 +32,13 @@ public class DepartmentController implements DepartmentControllerDoc {
             @RequestBody DepartmentUpdateRequest request
     ){
         return ResponseEntity.ok(departmentService.update(id,request));
+    }
+  
+    @GetMapping("/{id}")
+    public ResponseEntity<DepartmentDto> findById(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(departmentService.findById(id));
     }
 
 }
