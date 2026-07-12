@@ -25,4 +25,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             @Param("fromDate") Instant fromDate,
             @Param("toDate") Instant toDate
     );
+
+
+    boolean existsByEmail(String email);
+
 }
