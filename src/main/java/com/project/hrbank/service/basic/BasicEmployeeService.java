@@ -16,6 +16,7 @@ import com.project.hrbank.repository.DepartmentRepository;
 import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.repository.FileMetaRepository;
 import com.project.hrbank.service.EmployeeService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ import java.time.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BasicEmployeeService implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
@@ -109,10 +111,9 @@ public class BasicEmployeeService implements EmployeeService {
 
 
     private FileMeta getFileMetaFromMultipart(MultipartFile file){
-        String path = saveProfileImage(file);
+        String originalFileName = saveProfileImage(file);
         return fileMetaRepository.save(new FileMeta(
-                path,
-                path,
+                originalFileName,
                 file.getContentType(),
                 file.getSize()
         ));

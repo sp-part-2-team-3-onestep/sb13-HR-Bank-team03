@@ -10,6 +10,7 @@ import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.DepartmentRepository;
 import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.service.DepartmentService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class BasicDepartmentService implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
