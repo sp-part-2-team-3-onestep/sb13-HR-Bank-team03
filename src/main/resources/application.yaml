@@ -1,17 +1,12 @@
 spring:
   application:
     name: hrbank
+
   datasource:
     url: jdbc:postgresql://localhost:5432/hrbank
     username: onestep
     password: 1234
-
-    # H2 데이터베이스
-    #  datasource:
-    #    url: jdbc:h2:tcp://localhost/~/test
-    #    username: sa
-    #    password:
-    #    driver-class-name: org.h2.Driver
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -21,6 +16,7 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: true
+
   servlet:
     multipart:
       max-file-size: 10MB
@@ -28,9 +24,9 @@ spring:
 
 logging:
   level:
-    root: info
-    org.hibernate.SQL: info
-    org.hibernate.orm.jdbc.bind: info
+    root: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.orm.jdbc.bind: INFO
 
 hrbank:
   infra:

@@ -25,7 +25,8 @@ public interface EmployeeControllerDoc {
     })
     @GetMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<EmployeeDto> create(
-        @Parameter(content = @Content(mediaType = "application/json")) @RequestPart(name = "employee") EmployeeCreateRequest request,
+        @Parameter(content = @Content(mediaType = "application/json"))
+        @RequestPart(name = "employee") EmployeeCreateRequest request,
         @RequestPart(name = "profile") MultipartFile file
     );
 

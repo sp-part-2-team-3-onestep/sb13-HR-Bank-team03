@@ -18,8 +18,8 @@ public class ExceptionController {
 
     // status code - 400 error
     @ExceptionHandler({
-        DepartmentNameDuplicateException.class,
-        EmployeeDuplicateException.class
+            DepartmentNameDuplicateException.class,
+            EmployeeDuplicateException.class
     })
     public ProblemDetail BadRequestException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
@@ -31,7 +31,8 @@ public class ExceptionController {
 
     // status code - 404 error
     @ExceptionHandler({
-        DepartmentNotExistException.class
+            DepartmentNotExistException.class,
+            EmployeeNotExistException.class
     })
     public ProblemDetail NotFoundException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());

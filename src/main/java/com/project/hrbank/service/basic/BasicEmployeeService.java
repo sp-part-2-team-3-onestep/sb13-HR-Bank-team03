@@ -5,10 +5,12 @@ import com.project.hrbank.domain.*;
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
 import com.project.hrbank.dto.request.EmployeeSearchRequest;
 import com.project.hrbank.dto.response.CursorPageResponse;
+import com.project.hrbank.dto.request.EmployeeUpdateRequest;
 import com.project.hrbank.dto.response.EmployeeDto;
 import com.project.hrbank.exception.BaseException;
 import com.project.hrbank.exception.DepartmentNotExistException;
 import com.project.hrbank.exception.EmployeeDuplicateException;
+import com.project.hrbank.exception.EmployeeNotExistException;
 import com.project.hrbank.infra.Structure;
 import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.DepartmentRepository;
@@ -159,8 +161,7 @@ public class BasicEmployeeService implements EmployeeService {
 
     @Override
     public void deleteEmployee(Long id, String remoteIp) {
-        Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("직원을 찾을 수 없습니다. ID: " + id));
+        Employee employee = getEmployeeOrExcept(id);
 
         FileMeta profileImage = employee.getProfileImaged();
 
@@ -192,6 +193,65 @@ public class BasicEmployeeService implements EmployeeService {
             structure.delete(profileImage.getFileName());
             fileMetaRepository.delete(profileImage);
         }
+    }
+
+    @Override
+    public EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile file, String remoteIp) {
+        Employee employee = getEmployeeOrExcept(id);
+
+        String newEmail = request.email() != null ? request.email() : employee.getEmail();
+        if (!newEmail.equals(employee.getEmail())) {
+            checkEmail(newEmail);
+        }
+
+        Department newDepartment = request.departmentId() != null
+                ? getDepartmentOrExcept(request.departmentId())
+                : employee.getDepartment();
+
+        String newName = request.name() != null ? request.name() : employee.getName();
+        String newPosition = request.position() != null ? request.position() : employee.getPosition();
+        Instant newHireDate = request.hireDate() != null ? request.hireDate() : employee.getHireDate();
+        EmployeeStatus newStatus = request.status() != null ? request.status() : employee.getStatus();
+
+        FileMeta oldProfileImage = employee.getProfileImaged();
+        FileMeta newProfileImage = oldProfileImage;
+        if (file != null && !file.isEmpty()) {
+            newProfileImage = getFileMetaFromMultipart(file);
+        }
+
+        employee.update(
+                newName,
+                newDepartment,
+                newEmail,
+                newPosition,
+                newHireDate,
+                newStatus,
+                newProfileImage,
+                employee.getDeletedAt()
+        );
+
+        Employee saved = employeeRepository.save(employee);
+
+        employeeHistoryRepository.save(new EmployeeHistory(
+                saved,
+                saved.getDepartment(),
+                EmployeeHistoryType.EMPLOYEE_UPDATED,
+                "직원 수정",
+                request.memo(),
+                remoteIp
+        ));
+
+        if (file != null && !file.isEmpty() && oldProfileImage != null) {
+            structure.delete(oldProfileImage.getFileName());
+            fileMetaRepository.delete(oldProfileImage);
+        }
+
+        return mapper.toDto(saved);
+    }
+
+    private Employee getEmployeeOrExcept(Long id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotExistException("직원이 존재하지 않습니다. - " + id, "Employee not exists"));
     }
 
     private void checkEmail(String email){
