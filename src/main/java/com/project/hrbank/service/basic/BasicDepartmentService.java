@@ -2,20 +2,26 @@ package com.project.hrbank.service.basic;
 
 import com.project.hrbank.domain.Department;
 import com.project.hrbank.dto.request.DepartmentCreateRequest;
+import com.project.hrbank.dto.request.DepartmentSearchRequest;
 import com.project.hrbank.dto.request.DepartmentUpdateRequest;
+import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.dto.response.DepartmentDto;
 import com.project.hrbank.exception.DepartmentNameDuplicateException;
 import com.project.hrbank.exception.DepartmentNotExistException;
 import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.DepartmentRepository;
 import com.project.hrbank.repository.EmployeeRepository;
+import com.project.hrbank.repository.PagingRepository;
 import com.project.hrbank.service.DepartmentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,9 +77,9 @@ public class BasicDepartmentService implements DepartmentService {
     public DepartmentDto findById(Long id) {
         Department department = getEntityOrExcept(id);
       
-        long employeeCount = employeeRepository.countByDepartment_Id(id);
+        int employeeCount = employeeRepository.countByDepartmentId(id);
 
-        return mapper.toDto(department, Math.toIntExact(employeeCount));
+        return mapper.toDto(department, employeeCount);
     }
 
 
@@ -93,4 +99,45 @@ public class BasicDepartmentService implements DepartmentService {
         return department;
     }
 
+    @Override
+    public CursorPageResponse<DepartmentDto> getDepartmentsWithCursor(DepartmentSearchRequest request) {
+
+        List<Department> departments = departmentRepository.searchByCursor(request);
+
+        boolean hasNext = departments.size() > request.size();
+        if (hasNext) {
+            departments.remove(request.size().intValue());
+        }
+
+        // Entity -> DTO 변환 시 실제 직원수를 조회하여 매핑
+        List<DepartmentDto> content = departments.stream()
+                .map(dept -> {
+                    // DB에서 해당 부서의 실제 직원수를 조회
+                    int employeeCount = employeeRepository.countByDepartmentId(dept.getId());
+
+                    return mapper.toDto(dept, employeeCount);
+                })
+                .collect(Collectors.toList());
+
+        String nextCursor = null;
+        Long nextIdAfter = null;
+
+        if (!content.isEmpty()) {
+            DepartmentDto lastElement = content.get(content.size() - 1);
+
+            if ("name".equalsIgnoreCase(request.sortField())) {
+                nextCursor = lastElement.name();
+            } else {
+                nextCursor = lastElement.establishedDate();
+            }
+
+            nextIdAfter = lastElement.id().longValue();
+        }
+
+        long totalElements = departmentRepository.countDepartments(request.nameOrDescription());
+
+        return new CursorPageResponse<>(
+                content, nextCursor, nextIdAfter, request.size(), totalElements, hasNext
+        );
+    }
 }

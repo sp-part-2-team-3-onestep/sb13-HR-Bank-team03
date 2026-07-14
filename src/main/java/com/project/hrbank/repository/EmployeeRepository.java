@@ -12,7 +12,7 @@ import java.time.Instant;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-    long countByDepartment_Id(Long departmentId);
+    int countByDepartmentId(Long departmentId);
 
     @Query("""
         SELECT COUNT(e) FROM Employee e
