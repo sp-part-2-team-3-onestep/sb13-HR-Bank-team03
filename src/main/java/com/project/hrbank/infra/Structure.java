@@ -21,10 +21,10 @@ public interface Structure {
 
     ResponseEntity<?> download(String fileName);
 
+    void delete(String savePath);
+
 //    OutputStream set(Long fileId);
 
 //    void write(Long fileId, byte[] bytes);
-
-//    void delete(Long fileId);
 
 }

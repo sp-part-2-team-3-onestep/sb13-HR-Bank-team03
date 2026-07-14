@@ -81,10 +81,14 @@ public class LocalStructure implements Structure {
                 );
     }
 
-//    @Override
-//    public void delete(Long fileId) {}
+    @Override
+    public void delete(String savePath) {
+        Path path = rootPath.resolve(savePath);
 
-    private Path resolvePath(Long fileId) {
-        return rootPath.resolve(fileId.toString());
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new UncheckedIOException("파일 삭제에 실패했습니다: " + savePath, e);
+        }
     }
 }

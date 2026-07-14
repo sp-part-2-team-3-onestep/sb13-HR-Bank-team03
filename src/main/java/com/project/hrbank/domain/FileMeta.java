@@ -24,9 +24,9 @@ public class FileMeta extends Base {
     private Long fileSize;
 
     @Builder
-    public FileMeta(String fileName, String savePath,
-                    String fileType, Long fileSize,
-                    EmployeeStatus status) {
+    public FileMeta(String fileName,
+                    String fileType,
+                    Long fileSize) {
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileSize = fileSize;

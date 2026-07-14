@@ -1,6 +1,7 @@
 package com.project.hrbank.service.basic;
 
 import com.project.hrbank.domain.EmployeeHistory;
+import com.project.hrbank.dto.request.EmployeeHistorySearchRequest;
 import com.project.hrbank.dto.response.EmployeeHistoryDetailResponse;
 import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.EmployeeHistoryRepository;
@@ -28,5 +29,13 @@ public class BasicEmployeeHistoryService implements EmployeeHistoryService {
                         );
 
         return dtoMapper.toEmployeeHistoryDetailResponse(employeeHistory);
+    }
+
+    @Override
+    public void findByConditions(EmployeeHistorySearchRequest request) {
+        // 사번, 메모, IP 주소는 부분 일치 조건
+        // 시간은 범위 조건
+        // 유형은 완전 일치 조건
+        // 정렬 조건은 하나만
     }
 }
