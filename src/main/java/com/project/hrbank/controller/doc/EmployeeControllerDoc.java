@@ -1,6 +1,8 @@
 package com.project.hrbank.controller.doc;
 
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
+import com.project.hrbank.dto.request.EmployeeSearchRequest;
+import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.dto.response.EmployeeDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface EmployeeControllerDoc {
 
-
     @Operation(summary = "직원 생성")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",description = "직원 생성 성공"),
@@ -26,5 +27,17 @@ public interface EmployeeControllerDoc {
     ResponseEntity<EmployeeDto> create(
         @Parameter(content = @Content(mediaType = "application/json")) @RequestPart(name = "employee") EmployeeCreateRequest request,
         @RequestPart(name = "profile") MultipartFile file
+    );
+
+    @Operation(summary = "직원 목록 조회")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "직원 목록 조회 성공"
+        )
+    })
+    @GetMapping("")
+    ResponseEntity<CursorPageResponse<EmployeeDto>> getEmployees(
+        EmployeeSearchRequest searchRequest
     );
 }

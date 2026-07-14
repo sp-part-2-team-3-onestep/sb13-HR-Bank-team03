@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeePagingRepository {
 
     int countByDepartmentId(Long departmentId);
 

@@ -3,9 +3,12 @@ package com.project.hrbank.controller;
 import com.project.hrbank.controller.doc.EmployeeControllerDoc;
 import com.project.hrbank.domain.EmployeeStatus;
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
+import com.project.hrbank.dto.request.EmployeeSearchRequest;
+import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.dto.response.EmployeeDto;
 import com.project.hrbank.service.EmployeeService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -33,6 +36,16 @@ public class EmployeeController implements EmployeeControllerDoc {
         return ResponseEntity.ok(employeeService.countEmployees(status, fromDate, toDate));
     }
 
+    @GetMapping("")
+    public ResponseEntity<CursorPageResponse<EmployeeDto>> getEmployees(
+        EmployeeSearchRequest searchRequest
+    ) {
+
+        return ResponseEntity.ok(
+            employeeService.getEmployeesWithCursor(searchRequest)
+        );
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EmployeeDto> create(
         @RequestPart(name = "employee") EmployeeCreateRequest request,
@@ -40,6 +53,8 @@ public class EmployeeController implements EmployeeControllerDoc {
     ){
         return ResponseEntity.ok(employeeService.create(request,file));
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(

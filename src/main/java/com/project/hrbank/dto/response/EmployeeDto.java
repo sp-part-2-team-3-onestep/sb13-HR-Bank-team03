@@ -11,7 +11,7 @@ public record EmployeeDto(
     Long departmentId,
     String departmentName,
     String position,
-    Instant hireDate,   // 임시. 엔티티 저장타입을 String 으로 변환하면 쉽게 변환
+    String hireDate,   // 임시. 엔티티 저장타입을 String 으로 변환하면 쉽게 변환
     String status,
     Long profileImageId
 ) {
