@@ -121,9 +121,6 @@ public class BasicEmployeeService implements EmployeeService {
             EmployeeDto last =
                 content.get(content.size() - 1);
 
-            Employee lastEmployee =
-                employees.get(employees.size() - 1);
-
 
             if ("name".equalsIgnoreCase(request.sortField())) {
 
@@ -136,11 +133,8 @@ public class BasicEmployeeService implements EmployeeService {
 
             } else {
 
-                nextCursor = lastEmployee.getHireDate().toString();
-
+                nextCursor = last.hireDate().toString();
             }
-
-
             nextIdAfter = last.id();
         }
 
