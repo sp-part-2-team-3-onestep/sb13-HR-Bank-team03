@@ -2,6 +2,8 @@ package com.project.hrbank.mapper;
 
 import com.project.hrbank.domain.Department;
 import com.project.hrbank.domain.Employee;
+import com.project.hrbank.domain.EmployeeHistory;
+import com.project.hrbank.dto.response.ChangeLogDto;
 import com.project.hrbank.dto.response.DepartmentDto;
 import com.project.hrbank.dto.response.EmployeeDto;
 import org.mapstruct.Mapper;
@@ -21,5 +23,11 @@ public interface DtoMapper {
     @Mapping(target = "departmentName", source = "department.departmentName")
     @Mapping(target = "profileImageId", source = "profileImaged.id")
     EmployeeDto toDto(Employee employee);
+
+
+    @Mapping(target = "employeeNumber",source = "employee.employeeNumber")
+    @Mapping(target = "type", source = "employee.status")
+    @Mapping(target = "at", source = "createAt")
+    ChangeLogDto toDto(EmployeeHistory employeeHistory);
 
 }

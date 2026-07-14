@@ -39,3 +39,6 @@ out/
 
 .storage
 storage
+
+# queryDsl 클래스 폴더
+src/main/generated
