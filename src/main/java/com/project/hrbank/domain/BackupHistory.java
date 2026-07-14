@@ -43,4 +43,8 @@ public class BackupHistory extends Base {
         this.backupStatus = backupStatus;
     }
 
+    public String status(){
+        return backupStatus.toString();
+    }
+
 }

@@ -2,6 +2,9 @@ package com.project.hrbank.repository;
 
 import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +32,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     boolean existsByEmail(String email);
 
+
+    // 백업을 위해 페이징 단위로 나누어 쿼리하는 함수
+    @EntityGraph()
+    Page<Employee> findAllBy(Pageable pageable);
 }

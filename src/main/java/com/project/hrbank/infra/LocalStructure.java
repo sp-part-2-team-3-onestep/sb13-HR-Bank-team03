@@ -91,4 +91,13 @@ public class LocalStructure implements Structure {
             throw new UncheckedIOException("파일 삭제에 실패했습니다: " + savePath, e);
         }
     }
+
+
+    public String getNotDuplicateFileName(String fileName) {
+        return UUID.randomUUID() + "_" + fileName;
+    }
+
+    public String resolvePath(String fileName) {
+        return rootPath.resolve(fileName).toString();
+    }
 }

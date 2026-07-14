@@ -35,7 +35,7 @@ public interface DtoMapper {
     @Mapping(target = "worker", source = "ip")
     @Mapping(target = "startedAt", source = "startTime")
     @Mapping(target = "endedAt", source = "endTime")
-    @Mapping(target = "status", source = "backupStatus")
+    @Mapping(target = "status", expression = "java(backup.status())")
     @Mapping(target = "fileId", source = "fileMeta.id")
     BackupDto toDto(BackupHistory backup);
 

@@ -4,6 +4,8 @@ package com.project.hrbank.service.basic;
 import com.project.hrbank.config.DataCondition;
 import com.project.hrbank.domain.*;
 import com.project.hrbank.dto.response.BackupDto;
+import com.project.hrbank.exception.BackupHistoryAlreadyRunningExcption;
+import com.project.hrbank.exception.BackupHistoryStatusException;
 import com.project.hrbank.infra.Structure;
 import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.*;
@@ -31,22 +33,22 @@ import java.time.Instant;
 public class BasicBackupHistoryService implements BackupHistoryService {
     private final BackupHistoryRepository backupHistoryRepository;
     private final EmployeeRepository employeeRepository;
-    private final EmployeeHistoryRepository employeeHistoryRepository;
     private final FileMetaRepository fileMetaRepository;
     private final Structure structure;
     private final DtoMapper dtoMapper;
     private final DataCondition dataCondition;
 
+    private boolean lock = false;
+
     // 내부 백업 결과 반환용 이너클래스.
     // 그럴 일 은 없지만, 외부 클래스의 GC 를 위해 static(record) 선언
     private record BackupTfo(long result, FileMeta fileMeta) {}
 
-    public BackupDto create(String workerIp){
-        // 직원 데이터 상태 조회
 
-        // 백업 이력 등록
-        // 백업 시작 시간.
+    // ?? 400 에러 요청할 부분이 없음
+    public BackupDto create(String workerIp){
         Instant backupStart = Instant.now();
+
         // 백업 시작 상태 등록
         BackupHistory currentBackup = backupHistoryRepository.save(new BackupHistory(
                 workerIp,
@@ -81,25 +83,45 @@ public class BasicBackupHistoryService implements BackupHistoryService {
     }
 
 
+    public BackupDto getLatestBackup(String status){
+        BackupStatus filter;
+        switch (status){
+            case "COMPLETED" -> filter = BackupStatus.DONE;
+            case "FAILED" -> filter = BackupStatus.FAIL;
+            case "IN_PROGRESS" -> filter = BackupStatus.RUNNING;
+            default -> throw new BackupHistoryStatusException("잘못된 요청입니다","not current request");
+        }
+
+        BackupHistory bu = backupHistoryRepository.findFirstByBackupStatus(filter);
+        return dtoMapper.toDto(bu);
+    }
 
 
 
 
 
     private BackupTfo createBackup(){
+        // 싱글톤 클래스 변수로서, 백업 작업의 중첩을 방지
+        if (lock) throw new BackupHistoryAlreadyRunningExcption("백업이 진행중 입니다.","backup already running");
+        else lock = true;
+
         if (!dataCondition.checkDataChanged()) return new BackupTfo(1,null);
-        String filename = "";
+        String filename = structure.getNotDuplicateFileName("backup");
+        Path path = Paths.get(structure.resolvePath(filename));
 
-
-        long backupSize = createBackupFile(Paths.get(filename));
+        long backupSize = createBackupFile(path);
         BackupTfo res;
         if (backupSize < 0) {
             res = new BackupTfo(backupSize,null);
-            structure.delete(Paths.get(filename).toString());   // 에러라면 파일 삭제.
+            structure.delete(path.toString());   // 에러라면 파일 삭제.
         } else {
-            res = new BackupTfo(0, new FileMeta(filename,".cvs",backupSize));
+            FileMeta fileMeta = fileMetaRepository.save(new FileMeta(filename,".cvs",backupSize));
+            res = new BackupTfo(0, fileMeta);
         }
+
+        // 데이터 컨디션, 작업관리 체크
         dataCondition.flagSetUnchanged();
+        lock = false;
         return res;
     }
 

@@ -27,4 +27,8 @@ public interface Structure {
 
 //    void write(Long fileId, byte[] bytes);
 
+
+    String getNotDuplicateFileName(String fileName);
+
+    String resolvePath(String fileName);
 }
