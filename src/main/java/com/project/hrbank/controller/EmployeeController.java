@@ -1,8 +1,12 @@
 package com.project.hrbank.controller;
 
 import com.project.hrbank.controller.doc.EmployeeControllerDoc;
+import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeStatus;
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
+import com.project.hrbank.dto.request.EmployeeSearchRequest;
+import com.project.hrbank.dto.response.CursorPageResponse;
+import com.project.hrbank.dto.request.EmployeeUpdateRequest;
 import com.project.hrbank.dto.response.EmployeeDto;
 import com.project.hrbank.service.EmployeeService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,17 +30,27 @@ public class EmployeeController implements EmployeeControllerDoc {
 
     @GetMapping("/count")
     public ResponseEntity<Long> countEmployees(
-            @RequestParam(required = false) EmployeeStatus status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+        @RequestParam(required = false) EmployeeStatus status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
         return ResponseEntity.ok(employeeService.countEmployees(status, fromDate, toDate));
     }
 
+    @GetMapping("")
+    public ResponseEntity<CursorPageResponse<EmployeeDto>> getEmployees(
+        EmployeeSearchRequest searchRequest
+    ) {
+
+        return ResponseEntity.ok(
+            employeeService.getEmployeesWithCursor(searchRequest)
+        );
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EmployeeDto> create(
-            @RequestPart(name = "employee") EmployeeCreateRequest request,
-            @RequestPart(name = "profile", required = false) MultipartFile file
+        @RequestPart(name = "employee") EmployeeCreateRequest request,
+        @RequestPart(name = "profile", required = false) MultipartFile file
     ){
         return ResponseEntity.ok(employeeService.create(request,file));
     }
@@ -50,14 +64,24 @@ public class EmployeeController implements EmployeeControllerDoc {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(
-            HttpServletRequest request,
-            @PathVariable Long id
+        HttpServletRequest request,
+        @PathVariable Long id
     ) {
         String ip = request.getRemoteAddr(); // ip
-        employeeService.deleteEmployee(id,ip);
+        employeeService.deleteEmployee(id, ip);
 
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EmployeeDto> updateEmployee(
+            HttpServletRequest request,
+            @PathVariable Long id,
+            @RequestPart(name = "employee") EmployeeUpdateRequest updateRequest,
+            @RequestPart(name = "profile", required = false) MultipartFile file) {
+
+        String ip = request.getRemoteAddr();
+        return ResponseEntity.ok(employeeService.update(id, updateRequest, file, ip));
+    }
 
 }

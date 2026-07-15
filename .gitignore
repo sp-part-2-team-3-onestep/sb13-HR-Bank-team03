@@ -36,6 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
+gradle.properties
 
 .storage
 storage

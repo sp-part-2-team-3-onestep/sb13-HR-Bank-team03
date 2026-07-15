@@ -26,16 +26,16 @@ public class BackupHistory extends Base {
     @Column
     @Enumerated(EnumType.STRING)
     private BackupStatus backupStatus;
-    
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     private FileMeta fileMeta;
 
     public BackupHistory(
-            String worker,
-            Instant startTime,
-            Instant endTime,
-            BackupStatus backupStatus) {
+        String worker,
+        Instant startTime,
+        Instant endTime,
+        BackupStatus backupStatus) {
         super();
 
     }

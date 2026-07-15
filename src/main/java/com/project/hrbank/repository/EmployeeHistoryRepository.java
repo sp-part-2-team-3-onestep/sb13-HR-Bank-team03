@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeHistoryRepository extends JpaRepository<EmployeeHistory, Long>, EmployeeHistoryRepositoryCustom {
 
-
-
 //    @Query(
 //            """
 //            SELECT eh

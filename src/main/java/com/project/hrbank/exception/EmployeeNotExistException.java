@@ -7,3 +7,4 @@ public class EmployeeNotExistException extends BaseException {
     }
 
 }
+

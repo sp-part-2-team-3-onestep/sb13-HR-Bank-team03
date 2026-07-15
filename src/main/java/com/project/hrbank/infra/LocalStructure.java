@@ -76,9 +76,9 @@ public class LocalStructure implements Structure {
         Path path = rootPath.resolve(savedFileName);
         InputStream inputStream = get(path);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new InputStreamResource(inputStream)
-                );
+            .body(
+                new InputStreamResource(inputStream)
+            );
     }
 
     @Override

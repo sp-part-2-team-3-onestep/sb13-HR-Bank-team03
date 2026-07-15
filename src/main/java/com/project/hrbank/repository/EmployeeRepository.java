@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeePagingRepository {
 
     int countByDepartmentId(Long departmentId);
 
@@ -21,9 +21,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         AND (:toDate IS NULL OR e.hireDate < :toDate)
         """)
     long countByStatusAndHireDateRange(
-            @Param("status") EmployeeStatus status,
-            @Param("fromDate") Instant fromDate,
-            @Param("toDate") Instant toDate
+        @Param("status") EmployeeStatus status,
+        @Param("fromDate") Instant fromDate,
+        @Param("toDate") Instant toDate
     );
 
 

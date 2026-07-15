@@ -33,9 +33,9 @@ public class Department extends Base {
     private Instant deletedAt;
 
     public Department(
-            String departmentName,
-            String description,
-            LocalDate establishedDate
+        String departmentName,
+        String description,
+        LocalDate establishedDate
     ){
         this.departmentName = departmentName;
         this.description = description;

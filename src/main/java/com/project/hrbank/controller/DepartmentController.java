@@ -22,23 +22,23 @@ public class DepartmentController implements DepartmentControllerDoc {
 
     @PostMapping("")
     public ResponseEntity<DepartmentDto> create(
-            @RequestBody DepartmentCreateRequest request
-            )
+        @RequestBody DepartmentCreateRequest request
+    )
     {
         return ResponseEntity.ok(departmentService.create(request));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<DepartmentDto> update(
-            @PathVariable Long id,
-            @RequestBody DepartmentUpdateRequest request
+        @PathVariable Long id,
+        @RequestBody DepartmentUpdateRequest request
     ){
         return ResponseEntity.ok(departmentService.update(id,request));
     }
-  
+
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentDto> findById(
-            @PathVariable Long id
+        @PathVariable Long id
     ) {
         return ResponseEntity.ok(departmentService.findById(id));
     }
@@ -48,7 +48,7 @@ public class DepartmentController implements DepartmentControllerDoc {
      */
     @GetMapping("")
     public ResponseEntity<CursorPageResponse<DepartmentDto>> getDepartments(
-            DepartmentSearchRequest searchRequest
+        DepartmentSearchRequest searchRequest
     ) {
         return ResponseEntity.ok(departmentService.getDepartmentsWithCursor(searchRequest));
     }

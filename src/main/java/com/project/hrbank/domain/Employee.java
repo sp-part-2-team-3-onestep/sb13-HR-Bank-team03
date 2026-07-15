@@ -44,8 +44,8 @@ public class Employee extends Base {
     private Instant deletedAt;
 
     public static Employee create(String name, Department department, String employeeNumber,
-                                  String email, String position, Instant hireDate,
-                                  EmployeeStatus status, FileMeta profileImaged) {
+        String email, String position, Instant hireDate,
+        EmployeeStatus status, FileMeta profileImaged) {
         Employee employee = new Employee();
         employee.name = name;
         employee.department = department;
@@ -59,7 +59,7 @@ public class Employee extends Base {
     }
 
     public void update(String name, Department department, String email, String position,
-                       Instant hireDate, EmployeeStatus status, FileMeta profileImaged, Instant deletedAt) {
+        Instant hireDate, EmployeeStatus status, FileMeta profileImaged, Instant deletedAt) {
         this.name = name;
         this.department = department;
         this.email = email;

@@ -37,8 +37,8 @@ public class DepartmentRepositoryImpl implements PagingRepository {
             String op = "asc".equalsIgnoreCase(request.sortDirection()) ? ">" : "<";
 
             jpql.append("AND (").append(field).append(" ").append(op).append(" :cursor ")
-                    // 쿼리 파라미터 이름도 :idAfter 로 매핑
-                    .append("OR (").append(field).append(" = :cursor AND d.id ").append(op).append(" :idAfter)) ");
+                // 쿼리 파라미터 이름도 :idAfter 로 매핑
+                .append("OR (").append(field).append(" = :cursor AND d.id ").append(op).append(" :idAfter)) ");
         }
 
         // 3. 정렬 조건 설정

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -17,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class EmployeeRepositoryTest {
+
+    @MockBean
+    private JPAQueryFactory jpaQueryFactory;
 
     @Autowired private DepartmentRepository departmentRepository;
     @Autowired private EmployeeRepository employeeRepository;
