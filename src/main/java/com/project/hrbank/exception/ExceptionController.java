@@ -21,6 +21,7 @@ public class ExceptionController {
         DepartmentNameDuplicateException.class,
             EmployeeDuplicateException.class,
             BackupHistoryStatusException.class,
+            LocalDateFormatException.class
     })
     public ProblemDetail BadRequestException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());

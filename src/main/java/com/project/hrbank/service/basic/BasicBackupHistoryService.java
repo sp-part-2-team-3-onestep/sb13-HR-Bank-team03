@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -173,7 +174,7 @@ public class BasicBackupHistoryService implements BackupHistoryService {
             res = new BackupTfo(backupSize,null);
             structure.delete(path.toString());   // 에러라면 파일 삭제.
         } else {
-            FileMeta fileMeta = fileMetaRepository.save(new FileMeta(filename,".csv",backupSize));
+            FileMeta fileMeta = fileMetaRepository.save(new FileMeta(filename, MediaType.TEXT_PLAIN_VALUE, backupSize));
             res = new BackupTfo(0, fileMeta);
             // if save successful, set data unchange
             dataCondition.flagSetUnchanged();

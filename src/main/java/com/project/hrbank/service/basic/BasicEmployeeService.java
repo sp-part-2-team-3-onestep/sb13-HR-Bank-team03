@@ -208,6 +208,8 @@ public class BasicEmployeeService implements EmployeeService {
             structure.delete(profileImage.getFileName());
             fileMetaRepository.delete(profileImage);
         }
+
+        dataCondition.flagSetChanged();
     }
 
     @Override
@@ -260,6 +262,8 @@ public class BasicEmployeeService implements EmployeeService {
             structure.delete(oldProfileImage.getFileName());
             fileMetaRepository.delete(oldProfileImage);
         }
+
+        dataCondition.flagSetChanged();
 
         return mapper.toDto(saved);
     }
