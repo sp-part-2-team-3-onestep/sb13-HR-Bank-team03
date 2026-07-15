@@ -3,7 +3,9 @@ package com.project.hrbank.service.basic;
 
 import com.project.hrbank.config.DataCondition;
 import com.project.hrbank.domain.*;
+import com.project.hrbank.dto.request.BackupHistorySearchRequest;
 import com.project.hrbank.dto.response.BackupDto;
+import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.exception.BackupHistoryAlreadyRunningExcption;
 import com.project.hrbank.exception.BackupHistoryStatusException;
 import com.project.hrbank.infra.Structure;
@@ -14,6 +16,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedOutputStream;
@@ -26,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +49,7 @@ public class BasicBackupHistoryService implements BackupHistoryService {
     private record BackupTfo(long result, FileMeta fileMeta) {}
 
 
+    @Override
     // ?? 400 에러 요청할 부분이 없음
     public BackupDto create(String workerIp){
         Instant backupStart = Instant.now();
@@ -83,6 +88,7 @@ public class BasicBackupHistoryService implements BackupHistoryService {
     }
 
 
+    @Override
     public BackupDto getLatestBackup(String status){
         BackupStatus filter;
         switch (status){
@@ -96,16 +102,51 @@ public class BasicBackupHistoryService implements BackupHistoryService {
         return dtoMapper.toDto(bu);
     }
 
+    public CursorPageResponse<BackupDto> getBackupList(
+        BackupHistorySearchRequest request,
+        int pageSize,
+        String sort,
+        String direction
+    ){
+        Slice<BackupHistory> res = backupHistoryRepository.backupHistory(request,pageSize,sort,direction);
+
+        List<BackupDto> content = res.getContent().stream().map(dtoMapper::toDto).toList();
+
+        BackupDto last = !content.isEmpty() ? content.get(content.size() - 1) :  null;
+
+        String cursor = null;
+        if (last != null) {
+            if (sort.equals("startedAt")) cursor = last.startedAt().toString();
+            else cursor = last.endedAt().toString();
+        }
+
+        return new CursorPageResponse<BackupDto>(
+                content,
+                cursor,
+                last == null ? null : last.id(),
+                content.size(),
+                backupHistoryRepository.count(),
+                res.hasNext()
+        );
+    }
+
+
+
+
 
 
 
 
     private BackupTfo createBackup(){
-        // 싱글톤 클래스 변수로서, 백업 작업의 중첩을 방지
         if (lock) throw new BackupHistoryAlreadyRunningExcption("백업이 진행중 입니다.","backup already running");
         else lock = true;
 
-        if (!dataCondition.checkDataChanged()) return new BackupTfo(1,null);
+        if (!dataCondition.checkDataChanged()){
+            lock = false;
+            return new BackupTfo(1,null);
+        }
+
+
         String filename = structure.getNotDuplicateFileName("backup");
         Path path = Paths.get(structure.resolvePath(filename));
 

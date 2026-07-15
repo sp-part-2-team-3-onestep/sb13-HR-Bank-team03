@@ -28,7 +28,7 @@ public class BackupHistory extends Base {
     private BackupStatus backupStatus;
     
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "file_id")
     private FileMeta fileMeta;
 
     public BackupHistory(
