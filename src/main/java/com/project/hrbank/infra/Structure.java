@@ -19,7 +19,7 @@ public interface Structure {
 
     InputStream get(Path path);
 
-    ResponseEntity<?> download(String fileName);
+    ResponseEntity<?> download(String fileName, String contentType);
 
     void delete(String savePath);
 

@@ -33,7 +33,8 @@ public class ExceptionController {
     // status code - 404 error
     @ExceptionHandler({
             DepartmentNotExistException.class,
-            EmployeeNotExistException.class
+            EmployeeNotExistException.class,
+            FileNotExistException.class
     })
     public ProblemDetail NotFoundException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());

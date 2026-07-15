@@ -4,7 +4,9 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +39,7 @@ public class LocalStructure implements Structure {
         Path path = rootPath.resolve(savedFileName);
 
         try {
-            Files.write(path,bytes);
+            Files.write(path, bytes);
         } catch (IOException e) {
             throw new UncheckedIOException("파일 저장에 실패했습니다: " + fileName, e);
         }
@@ -60,7 +62,6 @@ public class LocalStructure implements Structure {
 //    }
 
 
-
     @Override
     public InputStream get(Path path) {
         try {
@@ -71,14 +72,21 @@ public class LocalStructure implements Structure {
     }
 
     @Override
-    public ResponseEntity<Resource> download(String fileName) {
-        String savedFileName = UUID.randomUUID() + "_" + fileName;
-        Path path = rootPath.resolve(savedFileName);
+    public ResponseEntity<Resource> download(String fileName, String contentType) {
+        Path path = rootPath.resolve(fileName);
         InputStream inputStream = get(path);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new InputStreamResource(inputStream)
-                );
+
+        String originalFileName = extractOriginalFileName(fileName);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + originalFileName + "\"")
+                .body(new InputStreamResource(inputStream));
+    }
+
+    private String extractOriginalFileName(String fileName) {
+        int idx = fileName.indexOf('_');
+        return idx >= 0 ? fileName.substring(idx + 1) : fileName;
     }
 
     @Override
@@ -91,7 +99,6 @@ public class LocalStructure implements Structure {
             throw new UncheckedIOException("파일 삭제에 실패했습니다: " + savePath, e);
         }
     }
-
 
     public String getNotDuplicateFileName(String fileName) {
         return UUID.randomUUID() + "_" + fileName;
