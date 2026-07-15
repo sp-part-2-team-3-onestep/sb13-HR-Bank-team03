@@ -52,8 +52,6 @@ public class BasicDepartmentService implements DepartmentService {
         );
     }
 
-    // Todo - employee 카운터 조회 매서드 Employee 레포지토리에 추가. dto 변환 매서드에 파라매터로 추가
-    // Todo - localdatetime 변환시 값이 없어도 에러가 나지 않도록 수정.
     public DepartmentDto update(Long id, DepartmentUpdateRequest request){
         String newName = request.name();
         String newDescription = request.description();

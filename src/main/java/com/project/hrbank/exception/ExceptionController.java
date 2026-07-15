@@ -18,7 +18,7 @@ public class ExceptionController {
 
     // status code - 400 error
     @ExceptionHandler({
-        DepartmentNameDuplicateException.class,
+            DepartmentNameDuplicateException.class,
             EmployeeDuplicateException.class,
             BackupHistoryStatusException.class,
             LocalDateFormatException.class
