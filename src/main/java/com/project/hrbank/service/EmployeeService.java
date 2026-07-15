@@ -25,6 +25,8 @@ public interface EmployeeService {
             MultipartFile file
     );
 
+    EmployeeDto findById(Long id);
+
     void deleteEmployee(
             Long id,
             String remoteIp
