@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 public class FileMetaController implements FileMetaControllerDoc {
-    private FileMetaService fileMetaService;
+    private final FileMetaService fileMetaService;
 
     @GetMapping("/{id}/download")
     public ResponseEntity<?> fileDownload(@PathVariable Long id) {
