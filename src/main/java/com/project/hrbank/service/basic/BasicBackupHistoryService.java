@@ -15,9 +15,11 @@ import com.project.hrbank.service.BackupHistoryService;
 import jakarta.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedOutputStream;
@@ -31,6 +33,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -45,9 +48,19 @@ public class BasicBackupHistoryService implements BackupHistoryService {
 
     private boolean lock = false;
 
+
     // 내부 백업 결과 반환용 이너클래스.
     // 그럴 일 은 없지만, 외부 클래스의 GC 를 위해 static(record) 선언
     private record BackupTfo(long result, FileMeta fileMeta) {}
+
+    @Scheduled(     // spring batch scheduler
+            fixedRateString = "${hrbank.batch:3600}",
+            initialDelay = 10,
+            timeUnit = TimeUnit.SECONDS
+    )
+    protected void batchCreate(){
+        create("system");
+    }
 
 
     @Override

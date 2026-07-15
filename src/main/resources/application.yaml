@@ -33,3 +33,4 @@ hrbank:
     type: local
     local:
       root-path: ./storage
+  batch: 3600
