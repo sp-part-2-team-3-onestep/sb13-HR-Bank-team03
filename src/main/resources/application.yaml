@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/hrbank
     username: onestep
-    password: postgres
+    password: 1234
     driver-class-name: org.postgresql.Driver
 
 #  datasource:

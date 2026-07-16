@@ -57,11 +57,11 @@ public class BasicDepartmentService implements DepartmentService {
         String newDescription = request.description();
         LocalDate newDate = getDateFromString(request.establishedDate());
 
-        // 제약 조건 - 이름은 중복 될 수 없음
-        nameCheck(newName);
         // 제약 - id 에 해당하는 부서 없음
         Department department = getEntityOrExcept(id);
-
+        // 제약 조건 - 이름은 중복 될 수 없음(이름이 변경 된 경우)
+        if (department.getDepartmentName().equals(newName)) nameCheck(newName);
+        
         if (newName != null) department.setDepartmentName(newName);
         if (newDescription != null) department.setDescription(newDescription);
         if (newDate != null) department.setEstablishedDate(newDate);
