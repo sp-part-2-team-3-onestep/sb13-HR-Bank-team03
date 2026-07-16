@@ -1,6 +1,6 @@
 package com.project.hrbank.dto.response;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 public record BackupCsvDTO(
         Long id,
@@ -9,7 +9,7 @@ public record BackupCsvDTO(
         String email,
         String department,
         String position,
-        Instant hireDate,
+        LocalDate hireDate,
         String status
 ) {
 }

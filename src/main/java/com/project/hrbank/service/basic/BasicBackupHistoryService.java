@@ -120,10 +120,10 @@ public class BasicBackupHistoryService implements BackupHistoryService {
     }
 
     public CursorPageResponse<BackupDto> getBackupList(
-        BackupHistorySearchRequest request,
-        int pageSize,
-        String sort,
-        String direction
+            BackupHistorySearchRequest request,
+            int pageSize,
+            String sort,
+            String direction
     ){
         Slice<BackupHistory> res = backupHistoryRepository.backupHistory(request,pageSize,sort,direction);
 

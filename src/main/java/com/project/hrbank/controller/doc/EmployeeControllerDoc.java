@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.format.annotation.DateTimeFormat;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,27 +30,27 @@ public interface EmployeeControllerDoc {
 
     @Operation(summary = "직원 생성")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",description = "직원 생성 성공"),
-        @ApiResponse(responseCode = "400",description = "직원 정보 오류"),
-        @ApiResponse(responseCode = "404",description = "부서 없음")
+            @ApiResponse(responseCode = "200",description = "직원 생성 성공"),
+            @ApiResponse(responseCode = "400",description = "직원 정보 오류"),
+            @ApiResponse(responseCode = "404",description = "부서 없음")
     })
     ResponseEntity<EmployeeDto> create(
-        @Parameter(content = @Content(mediaType = "application/json"))
-        @RequestPart(name = "employee") EmployeeCreateRequest request,
-        @RequestPart(name = "profile") MultipartFile file,
-        HttpServletRequest req
+            @Parameter(content = @Content(mediaType = "application/json"))
+            @RequestPart(name = "employee") EmployeeCreateRequest request,
+            @RequestPart(name = "profile") MultipartFile file,
+            HttpServletRequest req
     );
 
     @Operation(summary = "직원 목록 조회")
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "직원 목록 조회 성공"
-        )
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "직원 목록 조회 성공"
+            )
     })
     @GetMapping("")
     ResponseEntity<CursorPageResponse<EmployeeDto>> getEmployees(
-        EmployeeSearchRequest searchRequest
+            EmployeeSearchRequest searchRequest
     );
 
     @Operation(summary = "직원 분포 조회")

@@ -1,7 +1,6 @@
 package com.project.hrbank.controller;
 
 import com.project.hrbank.controller.doc.EmployeeControllerDoc;
-import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeStatus;
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
 import com.project.hrbank.dto.request.EmployeeSearchRequest;
