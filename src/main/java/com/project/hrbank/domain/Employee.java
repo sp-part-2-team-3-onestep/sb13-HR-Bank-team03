@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -31,7 +32,7 @@ public class Employee extends Base {
     private String position;
 
     @Column(nullable = false)
-    private Instant hireDate;
+    private LocalDate hireDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -44,8 +45,8 @@ public class Employee extends Base {
     private Instant deletedAt;
 
     public static Employee create(String name, Department department, String employeeNumber,
-        String email, String position, Instant hireDate,
-        EmployeeStatus status, FileMeta profileImaged) {
+                                  String email, String position, LocalDate hireDate,
+                                  EmployeeStatus status, FileMeta profileImaged) {
         Employee employee = new Employee();
         employee.name = name;
         employee.department = department;
@@ -59,7 +60,7 @@ public class Employee extends Base {
     }
 
     public void update(String name, Department department, String email, String position,
-        Instant hireDate, EmployeeStatus status, FileMeta profileImaged, Instant deletedAt) {
+                       LocalDate hireDate, EmployeeStatus status, FileMeta profileImaged, Instant deletedAt) {
         this.name = name;
         this.department = department;
         this.email = email;

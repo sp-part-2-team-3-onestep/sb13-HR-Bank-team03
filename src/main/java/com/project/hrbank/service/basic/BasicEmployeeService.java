@@ -65,7 +65,7 @@ public class BasicEmployeeService implements EmployeeService {
         String employeeNumber = genRandomEmployeeNumber();
         String position = request.position();
 
-        Instant hireDate = request.hireDate().atStartOfDay(ZoneOffset.UTC).toInstant();
+        LocalDate hireDate = request.hireDate();
 
         EmployeeStatus status = EmployeeStatus.ACTIVE;
         FileMeta fileMeta = file == null ? null : getFileMetaFromMultipart(file);
@@ -213,7 +213,7 @@ public class BasicEmployeeService implements EmployeeService {
 
         String newName = request.name() != null ? request.name() : employee.getName();
         String newPosition = request.position() != null ? request.position() : employee.getPosition();
-        Instant newHireDate = request.hireDate() != null ? request.hireDate() : employee.getHireDate();
+        LocalDate newHireDate = request.hireDate() != null ? request.hireDate() : employee.getHireDate();
         EmployeeStatus newStatus = request.status() != null ? request.status() : employee.getStatus();
 
         FileMeta oldProfileImage = employee.getProfileImaged();
