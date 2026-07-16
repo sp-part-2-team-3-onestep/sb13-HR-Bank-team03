@@ -6,6 +6,7 @@ import com.project.hrbank.dto.request.DepartmentSearchRequest;
 import com.project.hrbank.dto.request.DepartmentUpdateRequest;
 import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.dto.response.DepartmentDto;
+import com.project.hrbank.exception.DepartmentHasEmployeesException;
 import com.project.hrbank.exception.DepartmentNameDuplicateException;
 import com.project.hrbank.exception.DepartmentNotExistException;
 import com.project.hrbank.mapper.DtoMapper;
@@ -78,7 +79,7 @@ public class BasicDepartmentService implements DepartmentService {
     public DepartmentDto findById(Long id) {
         Department department = getEntityOrExcept(id);
 
-        int employeeCount = employeeRepository.countByDepartmentId(id);
+        int employeeCount = employeeRepository.countByDepartmentIdAndDeletedAtIsNull(id);
 
         return mapper.toDto(department, employeeCount);
     }
@@ -114,7 +115,7 @@ public class BasicDepartmentService implements DepartmentService {
         List<DepartmentDto> content = departments.stream()
             .map(dept -> {
                 // DB에서 해당 부서의 실제 직원수를 조회
-                int employeeCount = employeeRepository.countByDepartmentId(dept.getId());
+                int employeeCount = employeeRepository.countByDepartmentIdAndDeletedAtIsNull(dept.getId());
 
                 return mapper.toDto(dept, employeeCount);
             })
@@ -140,5 +141,18 @@ public class BasicDepartmentService implements DepartmentService {
         return new CursorPageResponse<>(
             content, nextCursor, nextIdAfter, request.size(), totalElements, hasNext
         );
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        Department department = departmentRepository.findById(id)
+                .filter(d -> d.getDeletedAt() == null)
+                .orElseThrow(() -> new DepartmentNotExistException("부서가 존재하지 않습니다. - " + id,"Department not exists"));
+
+        if (employeeRepository.countByDepartmentIdAndDeletedAtIsNull(id) > 0) {
+            throw new DepartmentHasEmployeesException("소속 직원이 있는 부서는 삭제할 수 없습니다." ,"Department has employees");
+        }
+
+        department.delete();
     }
 }

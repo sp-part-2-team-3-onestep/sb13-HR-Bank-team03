@@ -19,7 +19,7 @@ public interface Structure {
 
     InputStream get(Path path);
 
-    ResponseEntity<?> download(String fileName);
+    ResponseEntity<?> download(String fileName, String contentType);
 
     void delete(String savePath);
 
@@ -27,4 +27,8 @@ public interface Structure {
 
 //    void write(Long fileId, byte[] bytes);
 
+
+    String getNotDuplicateFileName(String fileName);
+
+    String resolvePath(String fileName);
 }

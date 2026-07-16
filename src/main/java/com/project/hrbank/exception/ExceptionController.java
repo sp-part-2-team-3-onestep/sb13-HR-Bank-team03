@@ -18,8 +18,9 @@ public class ExceptionController {
 
     // status code - 400 error
     @ExceptionHandler({
-            DepartmentNameDuplicateException.class,
-            EmployeeDuplicateException.class
+        DepartmentNameDuplicateException.class,
+            EmployeeDuplicateException.class,
+            BackupHistoryStatusException.class,
     })
     public ProblemDetail BadRequestException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
@@ -32,7 +33,8 @@ public class ExceptionController {
     // status code - 404 error
     @ExceptionHandler({
             DepartmentNotExistException.class,
-            EmployeeNotExistException.class
+            EmployeeNotExistException.class,
+            FileNotExistException.class
     })
     public ProblemDetail NotFoundException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
@@ -40,21 +42,21 @@ public class ExceptionController {
         pd.setProperty("timestamp", e.timestamp().toString());
         return pd;
     }
-//
-//    // status code - 409 error
-//    @ExceptionHandler({
-//
-//    })
-//    public ProblemDetail ConflictException(BaseException e, WebRequest request) {
-//        ProblemDetail pd = ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());
-//        pd.setProperty("message", e.getMessage());
-//        pd.setProperty("timestamp", e.timestamp().toString());
-//        return pd;
-//    }
+
+    // status code - 409 error
+    @ExceptionHandler({
+        BackupHistoryAlreadyRunningExcption.class
+    })
+    public ProblemDetail ConflictException(BaseException e, WebRequest request) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());
+        pd.setProperty("message", e.getMessage());
+        pd.setProperty("timestamp", e.timestamp().toString());
+        return pd;
+    }
 
     // 500 error (default)
     @ExceptionHandler({
-        BaseException.class,
+            BaseException.class,
     })
     public ProblemDetail InternalException(BaseException e, WebRequest request) {
 

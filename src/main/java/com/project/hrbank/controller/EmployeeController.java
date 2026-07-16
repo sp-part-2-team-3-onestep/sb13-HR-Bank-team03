@@ -17,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.project.hrbank.dto.response.EmployeeDistributionDto;
+import java.util.List;
 
 import java.time.LocalDate;
 
@@ -35,6 +37,17 @@ public class EmployeeController implements EmployeeControllerDoc {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
         return ResponseEntity.ok(employeeService.countEmployees(status, fromDate, toDate));
+    }
+
+    @Override
+    @GetMapping("/stats/distribution")
+    public ResponseEntity<List<EmployeeDistributionDto>> getEmployeeDistribution(
+            @RequestParam(defaultValue = "department") String groupBy,
+            @RequestParam(defaultValue = "ACTIVE") EmployeeStatus status
+    ) {
+        return ResponseEntity.ok(
+                employeeService.getEmployeeDistribution(groupBy, status)
+        );
     }
 
     @GetMapping("")

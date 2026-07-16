@@ -22,31 +22,32 @@ public class DepartmentRepositoryImpl implements PagingRepository {
 
         StringBuilder jpql = new StringBuilder("SELECT d FROM Department d WHERE d.deletedAt IS NULL ");
 
-        // 1. 검색어 조건
+        // 검색어 조건
         boolean hasSearch = StringUtils.hasText(request.nameOrDescription());
         if (hasSearch) {
             jpql.append("AND (LOWER(d.departmentName) LIKE LOWER(:search) OR LOWER(d.description) LIKE LOWER(:search)) ");
         }
 
+        // 파라미터로 받은 정렬조건 확인
         String field = "name".equalsIgnoreCase(request.sortField()) ? "d.departmentName" : "d.establishedDate";
         String direction = "asc".equalsIgnoreCase(request.sortDirection()) ? "ASC" : "DESC";
 
-        // 2. 커서 기반 페이징 조건 (lastId -> idAfter 로 수정)
+        // 커서 기반 페이징 조건
         boolean hasCursor = StringUtils.hasText(request.cursor()) && request.idAfter() != null;
         if (hasCursor) {
             String op = "asc".equalsIgnoreCase(request.sortDirection()) ? ">" : "<";
 
             jpql.append("AND (").append(field).append(" ").append(op).append(" :cursor ")
-                // 쿼리 파라미터 이름도 :idAfter 로 매핑
                 .append("OR (").append(field).append(" = :cursor AND d.id ").append(op).append(" :idAfter)) ");
         }
 
-        // 3. 정렬 조건 설정
+        // 정렬 조건 설정
         jpql.append("ORDER BY ").append(field).append(" ").append(direction).append(", d.id ").append(direction);
 
+        // jpql 을 String으로, query의 반환타입은 Department로 지정
         TypedQuery<Department> query = em.createQuery(jpql.toString(), Department.class);
 
-        // 4. 파라미터 바인딩
+        // 파라미터 바인딩
         if (hasSearch) {
             query.setParameter("search", "%" + request.nameOrDescription() + "%");
         }
@@ -57,10 +58,11 @@ public class DepartmentRepositoryImpl implements PagingRepository {
             } else {
                 query.setParameter("cursor", LocalDate.parse(request.cursor()));
             }
-            query.setParameter("idAfter", request.idAfter()); // 바인딩도 idAfter 로 변경
+            query.setParameter("idAfter", request.idAfter());
         }
 
-        query.setMaxResults(request.size() + 1); // 다음 페이지 여부 판별을 위해 +1개 조회
+        // 다음 페이지 여부 판별을 위해 +1개 조회
+        query.setMaxResults(request.size() + 1);
         return query.getResultList();
     }
 

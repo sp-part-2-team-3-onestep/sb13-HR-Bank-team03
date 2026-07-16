@@ -52,4 +52,10 @@ public class DepartmentController implements DepartmentControllerDoc {
     ) {
         return ResponseEntity.ok(departmentService.getDepartmentsWithCursor(searchRequest));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        departmentService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

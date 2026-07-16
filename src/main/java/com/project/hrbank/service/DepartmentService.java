@@ -13,5 +13,6 @@ public interface DepartmentService {
     DepartmentDto create(DepartmentCreateRequest request);
     DepartmentDto update(Long id, DepartmentUpdateRequest request);
     DepartmentDto findById(Long id);
+    void deleteById(Long id);
     CursorPageResponse<DepartmentDto> getDepartmentsWithCursor(DepartmentSearchRequest request);
 }

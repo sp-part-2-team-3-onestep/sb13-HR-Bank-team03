@@ -5,9 +5,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 
 @Configuration
-public class QuerydslConfig {
+@EnableScheduling
+public class AppConfig {
 
     @PersistenceContext
     private EntityManager em;
@@ -16,4 +19,10 @@ public class QuerydslConfig {
     public JPAQueryFactory jpaQueryFactory() {
         return new JPAQueryFactory(em);
     }
+
+    @Bean
+    public DataCondition DataCondition() {
+        return new DataCondition();
+    }
+
 }

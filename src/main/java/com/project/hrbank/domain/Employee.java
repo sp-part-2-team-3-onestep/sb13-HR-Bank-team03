@@ -14,7 +14,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 public class Employee extends Base {
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne(fetch = LAZY)

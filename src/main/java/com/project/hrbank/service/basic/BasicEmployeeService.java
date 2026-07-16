@@ -25,6 +25,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.project.hrbank.dto.response.EmployeeDistributionDto;
+import java.util.ArrayList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -249,6 +251,49 @@ public class BasicEmployeeService implements EmployeeService {
         }
 
         return mapper.toDto(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EmployeeDistributionDto> getEmployeeDistribution(
+            String groupBy,
+            EmployeeStatus status
+    ) {
+        List<Object[]> rows;
+
+        if ("department".equalsIgnoreCase(groupBy)) {
+            rows = employeeRepository.countGroupByDepartment(status);
+        } else if ("position".equalsIgnoreCase(groupBy)) {
+            rows = employeeRepository.countGroupByPosition(status);
+        } else {
+            throw new IllegalArgumentException("지원하지 않는 groupBy입니다. : " + groupBy);
+        }
+
+        long total = rows.stream()
+                .mapToLong(r -> (Long) r[1])
+                .sum();
+
+        List<EmployeeDistributionDto> result = new ArrayList<>();
+
+        for (Object[] row : rows) {
+            String groupKey = (String) row[0];
+            Long count = (Long) row[1];
+
+            double percentage =
+                    total == 0
+                            ? 0.0
+                            : Math.round(count * 1000.0 / total) / 10.0;
+
+            result.add(
+                    new EmployeeDistributionDto(
+                            groupKey,
+                            count,
+                            percentage
+                    )
+            );
+        }
+
+        return result;
     }
 
     private Employee getEmployeeOrExcept(Long id) {

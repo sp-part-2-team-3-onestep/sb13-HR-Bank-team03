@@ -28,7 +28,7 @@ public class BackupHistory extends Base {
     private BackupStatus backupStatus;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "file_id")
     private FileMeta fileMeta;
 
     public BackupHistory(
@@ -37,7 +37,14 @@ public class BackupHistory extends Base {
         Instant endTime,
         BackupStatus backupStatus) {
         super();
+        this.ip = worker;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.backupStatus = backupStatus;
+    }
 
+    public String status(){
+        return backupStatus.toString();
     }
 
 }

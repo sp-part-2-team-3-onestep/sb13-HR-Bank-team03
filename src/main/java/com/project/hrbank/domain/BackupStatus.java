@@ -2,10 +2,10 @@ package com.project.hrbank.domain;
 
 
 public enum BackupStatus {
-    RUNNING("run"),
-    DONE("done"),
-    FAIL("fail"),
-    SKIP("skip");
+    RUNNING("IN_PROGRESS"),
+    DONE("COMPLETED"),
+    FAIL("FAILED"),
+    SKIP("SKIPPED");
 
     private final String status;
 
@@ -13,7 +13,7 @@ public enum BackupStatus {
         this.status = status;
     }
 
-    public String getStatus() {
+    public String toString() {
         return status;
     }
 }

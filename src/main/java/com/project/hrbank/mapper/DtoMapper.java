@@ -1,8 +1,10 @@
 package com.project.hrbank.mapper;
 
+import com.project.hrbank.domain.BackupHistory;
 import com.project.hrbank.domain.Department;
 import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeHistory;
+import com.project.hrbank.dto.response.BackupDto;
 import com.project.hrbank.dto.response.ChangeLogDto;
 import com.project.hrbank.dto.response.DepartmentDto;
 import com.project.hrbank.dto.response.EmployeeDto;
@@ -41,4 +43,12 @@ public interface DtoMapper {
     EmployeeHistoryDetailResponse toEmployeeHistoryDetailResponse(
             EmployeeHistory employeeHistory
     );
+    @Mapping(target = "worker", source = "ip")
+    @Mapping(target = "startedAt", source = "startTime")
+    @Mapping(target = "endedAt", source = "endTime")
+    @Mapping(target = "status", expression = "java(backup.status())")
+    @Mapping(target = "fileId", source = "fileMeta.id")
+    BackupDto toDto(BackupHistory backup);
+
+
 }
