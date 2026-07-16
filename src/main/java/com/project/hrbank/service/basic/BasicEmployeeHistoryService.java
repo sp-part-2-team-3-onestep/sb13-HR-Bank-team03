@@ -119,9 +119,9 @@ public class BasicEmployeeHistoryService implements EmployeeHistoryService {
         }
 
         return switch (type) {
-            case "CREATE" -> EmployeeHistoryType.EMPLOYEE_ADD;
-            case "UPDATE" -> EmployeeHistoryType.EMPLOYEE_UPDATED;
-            case "DELETE" -> EmployeeHistoryType.EMPLOYEE_DELETED;
+            case "CREATED" -> EmployeeHistoryType.CREATED;
+            case "UPDATED" -> EmployeeHistoryType.UPDATED;
+            case "DELETED" -> EmployeeHistoryType.DELETED;
             default -> null;
         };
     }

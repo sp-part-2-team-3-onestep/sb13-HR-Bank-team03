@@ -3,6 +3,7 @@ package com.project.hrbank.service;
 import com.project.hrbank.domain.EmployeeStatus;
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
 import com.project.hrbank.dto.request.EmployeeSearchRequest;
+import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.dto.request.EmployeeUpdateRequest;
 import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.dto.response.EmployeeDistributionDto;
@@ -21,10 +22,7 @@ public interface EmployeeService {
             LocalDate toDate
     );
 
-    EmployeeDto create(
-            EmployeeCreateRequest request,
-            MultipartFile file
-    );
+    EmployeeDto create(EmployeeCreateRequest request, MultipartFile file, String ip);
 
     void deleteEmployee(
             Long id,

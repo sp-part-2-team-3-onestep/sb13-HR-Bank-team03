@@ -4,6 +4,7 @@ package com.project.hrbank.service.basic;
 import com.project.hrbank.config.DataCondition;
 import com.project.hrbank.domain.*;
 import com.project.hrbank.dto.request.BackupHistorySearchRequest;
+import com.project.hrbank.dto.response.BackupCsvDTO;
 import com.project.hrbank.dto.response.BackupDto;
 import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.exception.BackupHistoryAlreadyRunningExcption;
@@ -15,10 +16,11 @@ import com.project.hrbank.service.BackupHistoryService;
 import jakarta.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class BasicBackupHistoryService implements BackupHistoryService {
     private final BackupHistoryRepository backupHistoryRepository;
     private final EmployeeRepository employeeRepository;
@@ -117,10 +120,10 @@ public class BasicBackupHistoryService implements BackupHistoryService {
     }
 
     public CursorPageResponse<BackupDto> getBackupList(
-        BackupHistorySearchRequest request,
-        int pageSize,
-        String sort,
-        String direction
+            BackupHistorySearchRequest request,
+            int pageSize,
+            String sort,
+            String direction
     ){
         Slice<BackupHistory> res = backupHistoryRepository.backupHistory(request,pageSize,sort,direction);
 
@@ -165,17 +168,18 @@ public class BasicBackupHistoryService implements BackupHistoryService {
         Path path = Paths.get(structure.resolvePath(filename));
 
         long backupSize = createBackupFile(path);
+
         BackupTfo res;
         if (backupSize < 0) {
             res = new BackupTfo(backupSize,null);
             structure.delete(path.toString());   // 에러라면 파일 삭제.
         } else {
-            FileMeta fileMeta = fileMetaRepository.save(new FileMeta(filename,".cvs",backupSize));
+            FileMeta fileMeta = fileMetaRepository.save(new FileMeta(filename, MediaType.TEXT_PLAIN_VALUE, backupSize));
             res = new BackupTfo(0, fileMeta);
+            // if save successful, set data unchange
+            dataCondition.flagSetUnchanged();
         }
 
-        // 데이터 컨디션, 작업관리 체크
-        dataCondition.flagSetUnchanged();
         lock = false;
         return res;
     }
@@ -188,7 +192,7 @@ public class BasicBackupHistoryService implements BackupHistoryService {
         long size = 0L;
         // Structure 쪽 매서드 (output 스트림 관련)
         try (
-                OutputStream out = Files.newOutputStream(filepath, StandardOpenOption.APPEND);
+                OutputStream out = Files.newOutputStream(filepath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
                 BufferedOutputStream but = new BufferedOutputStream(out)
         ){
             // 페이지네이션으로 가져오고, 스트림에 써넣는다. 페이지가 끝날 때 까지.
@@ -198,17 +202,19 @@ public class BasicBackupHistoryService implements BackupHistoryService {
                 );
                 if (list.isEmpty()) break;
 
+                List<BackupCsvDTO> content = list.getContent().stream().map(dtoMapper::toCsvDTO).toList();
+
                 // list 를 csv 로 변환 후 쓰기
                 // 헤더
                 if (!header) {
                     header = true;
-                    byte[] headerBytes = getCvsHeader(list.getContent().get(0));
+                    byte[] headerBytes = getCvsHeader(content.get(0));
                     but.write(headerBytes);
                     size += headerBytes.length;
                 }
 
                 // 바디
-                for (Employee employee : list.getContent()) {
+                for (BackupCsvDTO employee : content) {
                     byte[] bodyBytes = getCvsBody(employee);
                     but.write(bodyBytes);
                     size += bodyBytes.length;
@@ -222,7 +228,7 @@ public class BasicBackupHistoryService implements BackupHistoryService {
             return size;
 
         } catch (IOException | RuntimeException e){
-            // 파일 작성 에러. 작성된 파일의 삭제 필요.
+            log.debug(e.getMessage(),e);
             return -1L;
         }
     }
@@ -233,32 +239,33 @@ public class BasicBackupHistoryService implements BackupHistoryService {
 
     private <T> byte[] getCvsHeader(T entity){
         StringBuilder header = new StringBuilder();
-        for (Field field : getFields(entity)) {
+        Class<?> cls = entity.getClass();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
             header.append(field.getName()).append(",");
         }
         header.deleteCharAt(header.length() - 1);
+        header.append("\n");
         return header.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     private <T> byte[] getCvsBody(T entity){
-        Class<?> cls = entity.getClass();
         StringBuilder body = new StringBuilder();
-        for (Field field : getFields(entity)) {
-            body.append(getFieldValue(cls,field.getName())).append(",");
+        Class<?> cls = entity.getClass();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            body.append((getFieldValues(entity, field))).append(",");
         }
         body.deleteCharAt(body.length() - 1);
+        body.append("\n");
         return body.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    private <T> Field[] getFields(T entity){
-        Class<?> cls = entity.getClass();
-        return cls.getFields();
-    }
-
-    private Object getFieldValue(Class<?> cls, String fieldName){
-        try{
-            return cls.getField(fieldName);
-        } catch (NoSuchFieldException e){
+    private <T> Object getFieldValues(T entity, Field field){
+        try {
+            return field.get(entity);
+        } catch (IllegalAccessException e) {
             return null;
         }
     }

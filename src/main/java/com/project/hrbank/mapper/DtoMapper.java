@@ -4,11 +4,7 @@ import com.project.hrbank.domain.BackupHistory;
 import com.project.hrbank.domain.Department;
 import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeHistory;
-import com.project.hrbank.dto.response.BackupDto;
-import com.project.hrbank.dto.response.ChangeLogDto;
-import com.project.hrbank.dto.response.DepartmentDto;
-import com.project.hrbank.dto.response.EmployeeDto;
-import com.project.hrbank.dto.response.EmployeeHistoryDetailResponse;
+import com.project.hrbank.dto.response.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -28,14 +24,11 @@ public interface DtoMapper {
     @Mapping(target = "departmentId", source = "department.id")
     @Mapping(target = "departmentName", source = "department.departmentName")
     @Mapping(target = "profileImageId", source = "profileImaged.id")
-    @Mapping(
-        target = "hireDate",
-        expression = "java(employee.getHireDate().atZone(java.time.ZoneOffset.UTC).format(java.time.format.DateTimeFormatter.ofPattern(\"yyyy-MM-dd\")))"
-    )
+    @Mapping(target = "hireDate", source = "hireDate", dateFormat = "yyyy-MM-dd")
     EmployeeDto toDto(Employee employee);
 
     @Mapping(target = "employeeNumber", source = "employee.employeeNumber")
-    @Mapping(target = "type", source = "employee.status")
+    @Mapping(target = "type",expression = "java(employeeHistory.getTypeString())")
     @Mapping(target = "at", source = "createAt")
     ChangeLogDto toDto(EmployeeHistory employeeHistory);
 
@@ -50,5 +43,9 @@ public interface DtoMapper {
     @Mapping(target = "fileId", source = "fileMeta.id")
     BackupDto toDto(BackupHistory backup);
 
+
+    @Mapping(target = "department", source = "department.departmentName")
+    @Mapping(target = "hireDate", source = "hireDate", dateFormat = "yyyy-MM-dd")
+    BackupCsvDTO toCsvDTO(Employee employee);
 
 }

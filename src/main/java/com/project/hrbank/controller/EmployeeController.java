@@ -1,7 +1,6 @@
 package com.project.hrbank.controller;
 
 import com.project.hrbank.controller.doc.EmployeeControllerDoc;
-import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeStatus;
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
 import com.project.hrbank.dto.request.EmployeeSearchRequest;
@@ -63,9 +62,11 @@ public class EmployeeController implements EmployeeControllerDoc {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EmployeeDto> create(
         @RequestPart(name = "employee") EmployeeCreateRequest request,
-        @RequestPart(name = "profile", required = false) MultipartFile file
+        @RequestPart(name = "profile", required = false) MultipartFile file,
+        HttpServletRequest req
     ){
-        return ResponseEntity.ok(employeeService.create(request,file));
+        String ip = req.getRemoteAddr();
+        return ResponseEntity.ok(employeeService.create(request, file, ip));
     }
 
     @GetMapping("/{id}")
