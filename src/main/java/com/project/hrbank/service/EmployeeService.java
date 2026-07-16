@@ -15,6 +15,8 @@ import java.util.List;
 
 public interface EmployeeService {
 
+    EmployeeDto findById(Long id);
+
     long countEmployees(
             EmployeeStatus status,
             LocalDate fromDate,
