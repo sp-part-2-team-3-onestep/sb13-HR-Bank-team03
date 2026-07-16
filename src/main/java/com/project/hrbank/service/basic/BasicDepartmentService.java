@@ -32,7 +32,7 @@ public class BasicDepartmentService implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
-    private final DtoMapper mapper;
+    private final DtoMapper dtoMapper;
 
 
 
@@ -46,7 +46,7 @@ public class BasicDepartmentService implements DepartmentService {
 
         Department dpt = departmentRepository.save(new Department(newName,newDescription,newDate));
         System.out.println(dpt.getId());
-        return mapper.toDto(
+        return dtoMapper.toDto(
             dpt
             ,0
         );
@@ -67,7 +67,7 @@ public class BasicDepartmentService implements DepartmentService {
         if (newDate != null) department.setEstablishedDate(newDate);
 
 
-        return mapper.toDto(departmentRepository.save(department),0);
+        return dtoMapper.toDto(departmentRepository.save(department),0);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class BasicDepartmentService implements DepartmentService {
 
         int employeeCount = employeeRepository.countByDepartmentIdAndDeletedAtIsNull(id);
 
-        return mapper.toDto(department, employeeCount);
+        return dtoMapper.toDto(department, employeeCount);
     }
 
 
@@ -112,7 +112,7 @@ public class BasicDepartmentService implements DepartmentService {
                 // DB에서 해당 부서의 실제 직원수를 조회
                 int employeeCount = employeeRepository.countByDepartmentIdAndDeletedAtIsNull(dept.getId());
 
-                return mapper.toDto(dept, employeeCount);
+                return dtoMapper.toDto(dept, employeeCount);
             })
             .collect(Collectors.toList());
 

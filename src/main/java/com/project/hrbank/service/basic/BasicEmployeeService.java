@@ -156,8 +156,7 @@ public class BasicEmployeeService implements EmployeeService {
         try {
             return objMapper.writeValueAsString(diffs);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
+            throw new BaseException("객체 직렬화 에러");
         }
     }
 
