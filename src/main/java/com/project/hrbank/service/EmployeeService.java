@@ -7,6 +7,7 @@ import com.project.hrbank.dto.request.EmployeeUpdateRequest;
 import com.project.hrbank.dto.response.CursorPageResponse;
 import com.project.hrbank.dto.response.EmployeeDistributionDto;
 import com.project.hrbank.dto.response.EmployeeDto;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -29,6 +30,9 @@ public interface EmployeeService {
             Long id,
             String remoteIp
     );
+
+    @Transactional(readOnly = true)
+    EmployeeDto findById(Long id);
 
     CursorPageResponse<EmployeeDto> getEmployeesWithCursor(
             EmployeeSearchRequest request

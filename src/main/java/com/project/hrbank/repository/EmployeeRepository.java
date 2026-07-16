@@ -54,6 +54,17 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
 
     boolean existsByEmail(String email);
 
+    // 여기 QueryDSL로 변경 가능 할 수 있음
+    @Query("""
+        select e.createAt
+        from Employee e
+        where e.createAt <= :to
+        order by e.createAt
+        """)
+    List<Instant> findCreatedDates(
+        @Param("to") Instant to
+    );
+
 
     // 백업을 위해 페이징 단위로 나누어 쿼리하는 함수
     @EntityGraph()
