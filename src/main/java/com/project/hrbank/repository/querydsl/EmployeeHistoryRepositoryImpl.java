@@ -48,11 +48,10 @@ public class EmployeeHistoryRepositoryImpl implements EmployeeHistoryRepositoryC
 
         BooleanBuilder where = new BooleanBuilder();
 
-//        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + type); // 이상 없음
 
         where.and(employeeNumberContains(employeeNumber));
         where.and(typeEq(type));
-        where.and(memoContains(memo));
+        memoContains(memo, where);
         where.and(ipAddressContains(ipAddress));
         where.and(atBetween(atFrom, atTo));
         where.and(cursorCondition(sortField, cursor, idAfter, desc));
@@ -94,8 +93,8 @@ public class EmployeeHistoryRepositoryImpl implements EmployeeHistoryRepositoryC
         return type == null ? null : eh.type.eq(type);
     }
 
-    private BooleanExpression memoContains(String memo) {
-        return memo == null ? null : eh.memo.containsIgnoreCase(memo);
+    private void memoContains(String memo, BooleanBuilder builder) {
+        if (memo != null && !memo.isEmpty()) builder.and(eh.memo.containsIgnoreCase(memo));
     }
 
     private BooleanExpression ipAddressContains(String ipAddress) {
