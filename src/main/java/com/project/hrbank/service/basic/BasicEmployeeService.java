@@ -1,6 +1,8 @@
 package com.project.hrbank.service.basic;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.hrbank.config.DataCondition;
 import com.project.hrbank.domain.*;
 import com.project.hrbank.dto.request.EmployeeCreateRequest;
@@ -19,8 +21,12 @@ import com.project.hrbank.repository.EmployeeHistoryRepository;
 import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.repository.FileMetaRepository;
 import com.project.hrbank.service.EmployeeService;
+
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +48,7 @@ public class BasicEmployeeService implements EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final FileMetaRepository fileMetaRepository;
     private final Structure structure;
-    private final DtoMapper mapper;
+    private final DtoMapper dtoMapper;
     private final DataCondition dataCondition;
 
     @Transactional(readOnly = true)
@@ -92,12 +98,12 @@ public class BasicEmployeeService implements EmployeeService {
                 emp,
                 emp.getDepartment(),
                 EmployeeHistoryType.CREATED,
-                "직원 생성",
+                diff(null,emp), // chainge detail
                 memo,
                 ip
         ));
 
-        return mapper.toDto(emp);
+        return dtoMapper.toDto(emp);
     }
 
     @Transactional(readOnly = true)
@@ -105,8 +111,57 @@ public class BasicEmployeeService implements EmployeeService {
     public EmployeeDto findById(Long id) {
         Employee employee = getEmployeeOrExcept(id);
 
-        return mapper.toDto(employee);
+        return dtoMapper.toDto(employee);
     }
+
+    // 비교 후 추가를 위한 메서드
+    // T = inputClass , R = returnClass
+    private <T, R> void compareAndAdd(
+            List<Diff> diffs,
+            String propertyName,
+            T before,
+            T after,
+            Function<T, R> valueExtractor
+    ) {
+        // 반환 타입에 대한 처리
+        R beforeValue = (before != null) ? valueExtractor.apply(before) : null;
+        R afterValue = (after != null) ? valueExtractor.apply(after) : null;
+
+        if (!Objects.equals(beforeValue, afterValue)) {
+            String beforeStr = (beforeValue != null) ? beforeValue.toString() : null;
+            String afterStr = (afterValue != null) ? afterValue.toString() : null;
+
+            diffs.add(new Diff(propertyName, beforeStr, afterStr));
+        }
+        // 부서 -> 부서 이름만 저장
+    }
+
+    private String diff(Employee before, Employee after) {
+
+        if (before == null && after == null) return null;
+
+        List<Diff> diffs = new ArrayList<>(); // 캐리어
+        ObjectMapper objMapper = new ObjectMapper();
+
+        compareAndAdd(diffs, "hireDate", before, after, Employee::getHireDate);
+        compareAndAdd(diffs, "position", before, after, Employee::getPosition);
+        compareAndAdd(diffs, "name", before, after, Employee::getName);
+        compareAndAdd(diffs, "email", before, after, Employee::getEmail);
+        compareAndAdd(diffs, "employeeNumber", before, after, Employee::getEmployeeNumber);
+        compareAndAdd(diffs, "department", before, after, e -> e.getDepartment().getDepartmentName());
+        compareAndAdd(diffs, "status", before, after, Employee::getStatus);
+
+        if (diffs.isEmpty()) return null;
+
+        try {
+            return objMapper.writeValueAsString(diffs);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -129,7 +184,7 @@ public class BasicEmployeeService implements EmployeeService {
 
         List<EmployeeDto> content =
             employees.stream()
-                .map(mapper::toDto)
+                .map(dtoMapper::toDto)
                 .collect(Collectors.toList());
 
 
@@ -198,7 +253,7 @@ public class BasicEmployeeService implements EmployeeService {
             emp,
             emp.getDepartment(),
             EmployeeHistoryType.DELETED,
-            "직원 삭제",
+            diff(emp,null),
             null,
             remoteIp
         ));
@@ -215,6 +270,18 @@ public class BasicEmployeeService implements EmployeeService {
     @Override
     public EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile file, String remoteIp) {
         Employee employee = getEmployeeOrExcept(id);
+
+        // employee 는 업데이트 -> 참조값이 바뀌므로, 원래 값의 객체 하나 복사.
+        Employee original = Employee.create(
+                employee.getName(),
+                employee.getDepartment(),
+                employee.getEmployeeNumber(),
+                employee.getEmail(),
+                employee.getPosition(),
+                employee.getHireDate(),
+                employee.getStatus(),
+                employee.getProfileImaged()
+        );
 
         String newEmail = request.email() != null ? request.email() : employee.getEmail();
         if (!newEmail.equals(employee.getEmail())) {
@@ -253,7 +320,7 @@ public class BasicEmployeeService implements EmployeeService {
                 saved,
                 saved.getDepartment(),
                 EmployeeHistoryType.UPDATED,
-                "직원 수정",
+                diff(original,saved),
                 request.memo(),
                 remoteIp
         ));
@@ -265,7 +332,7 @@ public class BasicEmployeeService implements EmployeeService {
 
         dataCondition.flagSetChanged();
 
-        return mapper.toDto(saved);
+        return dtoMapper.toDto(saved);
     }
 
     @Override

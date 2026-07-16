@@ -47,8 +47,8 @@ public class BasicDepartmentService implements DepartmentService {
         Department dpt = departmentRepository.save(new Department(newName,newDescription,newDate));
         System.out.println(dpt.getId());
         return mapper.toDto(
-                dpt
-                ,0
+            dpt
+            ,0
         );
     }
 
@@ -61,7 +61,7 @@ public class BasicDepartmentService implements DepartmentService {
         Department department = getEntityOrExcept(id);
         // 제약 조건 - 이름은 중복 될 수 없음(이름이 변경 된 경우)
         if (!department.getDepartmentName().equals(newName)) nameCheck(newName);
-
+        
         if (newName != null) department.setDepartmentName(newName);
         if (newDescription != null) department.setDescription(newDescription);
         if (newDate != null) department.setEstablishedDate(newDate);
@@ -108,13 +108,13 @@ public class BasicDepartmentService implements DepartmentService {
 
         // Entity -> DTO 변환 시 실제 직원수를 조회하여 매핑
         List<DepartmentDto> content = departments.stream()
-                .map(dept -> {
-                    // DB에서 해당 부서의 실제 직원수를 조회
-                    int employeeCount = employeeRepository.countByDepartmentIdAndDeletedAtIsNull(dept.getId());
+            .map(dept -> {
+                // DB에서 해당 부서의 실제 직원수를 조회
+                int employeeCount = employeeRepository.countByDepartmentIdAndDeletedAtIsNull(dept.getId());
 
-                    return mapper.toDto(dept, employeeCount);
-                })
-                .collect(Collectors.toList());
+                return mapper.toDto(dept, employeeCount);
+            })
+            .collect(Collectors.toList());
 
         String nextCursor = null;
         Long nextIdAfter = null;
@@ -134,7 +134,7 @@ public class BasicDepartmentService implements DepartmentService {
         long totalElements = departmentRepository.countDepartments(request.nameOrDescription());
 
         return new CursorPageResponse<>(
-                content, nextCursor, nextIdAfter, request.size(), totalElements, hasNext
+            content, nextCursor, nextIdAfter, request.size(), totalElements, hasNext
         );
     }
 

@@ -1,15 +1,26 @@
 package com.project.hrbank.service.basic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.hrbank.domain.Diff;
+import com.project.hrbank.domain.Employee;
 import com.project.hrbank.domain.EmployeeHistory;
 import com.project.hrbank.domain.EmployeeHistoryType;
 import com.project.hrbank.dto.request.EmployeeHistorySearchRequest;
 import com.project.hrbank.dto.response.ChangeLogDto;
 import com.project.hrbank.dto.response.CursorPageResponseChangeLogDto;
+import com.project.hrbank.dto.response.DiffDto;
 import com.project.hrbank.dto.response.EmployeeHistoryDetailResponse;
+import com.project.hrbank.exception.BaseException;
 import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.EmployeeHistoryRepository;
+import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.service.EmployeeHistoryService;
+import io.swagger.v3.core.util.Json;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +31,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class BasicEmployeeHistoryService implements EmployeeHistoryService {
 
     private final EmployeeHistoryRepository employeeHistoryRepository;
+    private final EmployeeRepository employeeRepository;
     private final DtoMapper dtoMapper;
 
     @Override
@@ -69,6 +82,8 @@ public class BasicEmployeeHistoryService implements EmployeeHistoryService {
 
     @Override
     public EmployeeHistoryDetailResponse findById(Long id) {
+        ObjectMapper jackson = new ObjectMapper();
+
         EmployeeHistory employeeHistory =
                 employeeHistoryRepository.findById(id)
                         .orElseThrow(() ->
@@ -77,7 +92,17 @@ public class BasicEmployeeHistoryService implements EmployeeHistoryService {
                                 )
                         );
 
-        return dtoMapper.toEmployeeHistoryDetailResponse(employeeHistory);
+        try {
+            List<DiffDto> detail = jackson.readValue(
+                    employeeHistory.getChangeDetail(),
+                    new TypeReference<List<Diff>>(){}
+            ).stream().map(dtoMapper::toDto).toList();
+            System.out.println(detail);
+            return dtoMapper.toEmployeeHistoryDetailResponse(employeeHistory,detail);
+        } catch (JsonProcessingException e){
+            log.error(e.getMessage(),e);
+            throw new BaseException();
+        }
     }
 
     private String getNextCursor(
