@@ -62,4 +62,13 @@ public class EmployeeHistoryController implements EmployeeHistoryControllerDoc {
         log.info("직원 정보 수정 이력 상세 조회 요청: id={}", id);
         return employeeHistoryService.findById(id);
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countChangeLogs(
+            @RequestParam(required = false) Instant fromDate,
+            @RequestParam(required = false) Instant toDate
+    ) {
+        return ResponseEntity.ok(employeeHistoryService.countChangeLogs(fromDate, toDate));
+    }
+
 }

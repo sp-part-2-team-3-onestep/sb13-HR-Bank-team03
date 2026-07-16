@@ -4,7 +4,7 @@ import com.project.hrbank.domain.EmployeeStatus;
 import java.time.LocalDate;
 
 public record EmployeeSearchRequest(
-    String keyword,
+    String nameOrEmail,
     EmployeeStatus status,
     String employeeNumber,
     String departmentName,

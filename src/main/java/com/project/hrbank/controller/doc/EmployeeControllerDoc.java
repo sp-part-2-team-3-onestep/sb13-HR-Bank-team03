@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,15 +28,15 @@ public interface EmployeeControllerDoc {
 
     @Operation(summary = "직원 생성")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "직원 생성 성공"),
-            @ApiResponse(responseCode = "400", description = "직원 정보 오류"),
-            @ApiResponse(responseCode = "404", description = "부서 없음")
+            @ApiResponse(responseCode = "200",description = "직원 생성 성공"),
+            @ApiResponse(responseCode = "400",description = "직원 정보 오류"),
+            @ApiResponse(responseCode = "404",description = "부서 없음")
     })
-    @GetMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<EmployeeDto> create(
             @Parameter(content = @Content(mediaType = "application/json"))
             @RequestPart(name = "employee") EmployeeCreateRequest request,
-            @RequestPart(name = "profile") MultipartFile file
+            @RequestPart(name = "profile") MultipartFile file,
+            HttpServletRequest req
     );
 
     @Operation(summary = "직원 목록 조회")

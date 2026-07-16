@@ -4,15 +4,11 @@ import com.project.hrbank.domain.Employee;
 import com.project.hrbank.dto.request.EmployeeSearchRequest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -30,11 +26,11 @@ public class EmployeeRepositoryImpl implements EmployeePagingRepository {
         String field;
 
         // 이름 또는 이메일 검색
-        if (StringUtils.hasText(request.keyword())) {
+        if (StringUtils.hasText(request.nameOrEmail())) {
             jpql.append("""
                     AND (
-                        LOWER(e.name) LIKE LOWER(:keyword)
-                        OR LOWER(e.email) LIKE LOWER(:keyword)
+                        LOWER(e.name) LIKE LOWER(:nameOrEmail)
+                        OR LOWER(e.email) LIKE LOWER(:nameOrEmail)
                     )
                     """);
         }
@@ -77,7 +73,7 @@ public class EmployeeRepositoryImpl implements EmployeePagingRepository {
 
         // 입사 종료일
         if (request.hireDateTo() != null) {
-            jpql.append("AND e.hireDate < :hireDateTo ");
+            jpql.append("AND e.hireDate <= :hireDateTo ");
         }
 
 
@@ -93,48 +89,47 @@ public class EmployeeRepositoryImpl implements EmployeePagingRepository {
         String direction = "asc".equalsIgnoreCase(request.sortDirection()) ? "ASC" : "DESC";
 
 
-        // Cursor 조건
+        // Cursor 조건 - idAfter는 있으면 쓰고, 없어도 cursor만으로 동작해야 함
         boolean hasCursor = StringUtils.hasText(request.cursor());
         boolean hasIdAfter = request.idAfter() != null;
-
 
         if (hasCursor) {
             String operator = "ASC".equals(direction) ? ">" : "<";
 
             if (hasIdAfter) {
                 jpql.append("AND (")
-                    .append(field).append(" ")
-                    .append(operator)
-                    .append(" :cursor ")
-                    .append("OR (")
-                    .append(field)
-                    .append(" = :cursor ")
-                    .append("AND e.id ")
-                    .append(operator)
-                    .append(" :idAfter)) ");
+                        .append(field).append(" ")
+                        .append(operator)
+                        .append(" :cursor ")
+                        .append("OR (")
+                        .append(field)
+                        .append(" = :cursor ")
+                        .append("AND e.id ")
+                        .append(operator)
+                        .append(" :idAfter)) ");
             } else {
                 jpql.append("AND ")
-                    .append(field)
-                    .append(" ")
-                    .append(operator)
-                    .append(" :cursor ");
+                        .append(field)
+                        .append(" ")
+                        .append(operator)
+                        .append(" :cursor ");
             }
         }
 
         // 정렬
         jpql.append("ORDER BY ")
-            .append(field)
-            .append(" ")
-            .append(direction)
-            .append(", e.id ")
-            .append(direction);
+                .append(field)
+                .append(" ")
+                .append(direction)
+                .append(", e.id ")
+                .append(direction);
 
         TypedQuery<Employee> query =
                 em.createQuery(jpql.toString(), Employee.class);
 
 
-        if (StringUtils.hasText(request.keyword())) {
-            query.setParameter("keyword", "%" + request.keyword() + "%");
+        if (StringUtils.hasText(request.nameOrEmail())) {
+            query.setParameter("nameOrEmail", "%" + request.nameOrEmail() + "%");
         }
 
         if (request.status() != null) {
@@ -169,8 +164,11 @@ public class EmployeeRepositoryImpl implements EmployeePagingRepository {
                 query.setParameter("cursor", request.cursor());
             }
 
-            if (hasIdAfter) query.setParameter("idAfter", request.idAfter());
+            if (hasIdAfter) {
+                query.setParameter("idAfter", request.idAfter());
+            }
         }
+
         query.setMaxResults(request.size() + 1);
 
         return query.getResultList();

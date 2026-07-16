@@ -72,4 +72,7 @@ public class EmployeeHistory extends Base {
     public Instant getCreatedAt() {
         return super.getCreateAt();
     }
+
+    public String getTypeString(){ return type.toString(); }
+
 }
