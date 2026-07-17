@@ -3,9 +3,9 @@ spring:
     name: hrbank
 
   datasource:
-    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
-    username: ${PGUSER}
-    password: ${PGPASSWORD}
+    url: jdbc:postgresql://postgres:QpHnJRYmbLMLEiIUJaeBqogbuHBVenvL@postgres.railway.internal:5432/railway
+    username: postgres
+    password: QpHnJRYmbLMLEiIUJaeBqogbuHBVenvL
     driver-class-name: org.postgresql.Driver
 
 #  datasource:
