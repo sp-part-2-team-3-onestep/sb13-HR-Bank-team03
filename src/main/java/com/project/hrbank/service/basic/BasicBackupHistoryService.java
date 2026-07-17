@@ -119,6 +119,7 @@ public class BasicBackupHistoryService implements BackupHistoryService {
         return dtoMapper.toDto(bu);
     }
 
+    @Override
     public CursorPageResponse<BackupDto> getBackupList(
             BackupHistorySearchRequest request,
             int pageSize,
@@ -197,7 +198,7 @@ public class BasicBackupHistoryService implements BackupHistoryService {
         ){
             // 페이지네이션으로 가져오고, 스트림에 써넣는다. 페이지가 끝날 때 까지.
             while(true){
-                Page<Employee> list = employeeRepository.findAllBy(
+                Page<Employee> list = employeeRepository.findAllByOrderByIdAsc(
                         PageRequest.of(pageNumber, pageSize)
                 );
                 if (list.isEmpty()) break;
