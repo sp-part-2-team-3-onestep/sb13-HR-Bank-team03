@@ -14,7 +14,6 @@ import com.project.hrbank.dto.response.EmployeeHistoryDetailResponse;
 import com.project.hrbank.exception.BaseException;
 import com.project.hrbank.mapper.DtoMapper;
 import com.project.hrbank.repository.EmployeeHistoryRepository;
-import com.project.hrbank.repository.EmployeeRepository;
 import com.project.hrbank.service.EmployeeHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +88,9 @@ public class BasicEmployeeHistoryService implements EmployeeHistoryService {
                         );
 
         try {
+            if (employeeHistory.getChangeDetail() == null)
+                return dtoMapper.toEmployeeHistoryDetailResponse(employeeHistory,null);
+
             List<DiffDto> detail = jackson.readValue(
                     employeeHistory.getChangeDetail(),
                     new TypeReference<List<Diff>>(){}

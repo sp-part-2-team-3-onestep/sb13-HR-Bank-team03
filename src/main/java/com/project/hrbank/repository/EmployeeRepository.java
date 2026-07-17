@@ -71,5 +71,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
 
   // 백업을 위해 페이징 단위로 나누어 쿼리하는 함수
   @EntityGraph()
-  Page<Employee> findAllBy(Pageable pageable);
+  Page<Employee> findAllByOrderByIdAsc(Pageable pageable);
+
 }
