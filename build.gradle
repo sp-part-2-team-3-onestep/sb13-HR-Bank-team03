@@ -7,11 +7,14 @@ plugins {
 group = 'com.project'
 version = '0.0.1-SNAPSHOT'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
+// java {
+// 	toolchain {
+// 		languageVersion = JavaLanguageVersion.of(17)
+// 	}
+// }
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -58,4 +61,12 @@ clean {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+bootJar {
+    enabled = true
+	archiveFileName = 'app.jar'
+}
+jar {
+    enabled = false // plain.jar 생성을 막아 Railway가 헷갈리지 않게 합니다.
 }
