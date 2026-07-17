@@ -1,17 +1,101 @@
 package com.project.hrbank.controller;
 
+import com.project.hrbank.controller.doc.EmployeeControllerDoc;
+import com.project.hrbank.domain.EmployeeStatus;
+import com.project.hrbank.dto.request.EmployeeCreateRequest;
+import com.project.hrbank.dto.request.EmployeeSearchRequest;
+import com.project.hrbank.dto.response.CursorPageResponse;
+import com.project.hrbank.dto.request.EmployeeUpdateRequest;
+import com.project.hrbank.dto.response.EmployeeDto;
+import com.project.hrbank.service.EmployeeService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.project.hrbank.dto.response.EmployeeDistributionDto;
+import java.util.List;
+
+import java.time.LocalDate;
 
 @RestController
-@RequestMapping
+@RequestMapping({"/api/employees"})
 @RequiredArgsConstructor
-public class EmployeeController {
+@Slf4j
+public class EmployeeController implements EmployeeControllerDoc {
 
-    @GetMapping
-    public void temo(){
+    private final EmployeeService employeeService;
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> countEmployees(
+        @RequestParam(required = false) EmployeeStatus status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+
+        return ResponseEntity.ok(employeeService.countEmployees(status, fromDate, toDate));
     }
+
+    @Override
+    @GetMapping("/stats/distribution")
+    public ResponseEntity<List<EmployeeDistributionDto>> getEmployeeDistribution(
+            @RequestParam(defaultValue = "department") String groupBy,
+            @RequestParam(defaultValue = "ACTIVE") EmployeeStatus status
+    ) {
+        return ResponseEntity.ok(
+                employeeService.getEmployeeDistribution(groupBy, status)
+        );
+    }
+
+    @GetMapping("")
+    public ResponseEntity<CursorPageResponse<EmployeeDto>> getEmployees(
+        EmployeeSearchRequest searchRequest
+    ) {
+
+        return ResponseEntity.ok(
+            employeeService.getEmployeesWithCursor(searchRequest)
+        );
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EmployeeDto> create(
+        @RequestPart(name = "employee") EmployeeCreateRequest request,
+        @RequestPart(name = "profile", required = false) MultipartFile file,
+        HttpServletRequest req
+    ){
+        String ip = req.getRemoteAddr();
+        return ResponseEntity.ok(employeeService.create(request, file, ip));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EmployeeDto> findById(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(employeeService.findById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(
+        HttpServletRequest request,
+        @PathVariable Long id
+    ) {
+        String ip = request.getRemoteAddr(); // ip
+        employeeService.deleteEmployee(id, ip);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EmployeeDto> updateEmployee(
+            HttpServletRequest request,
+            @PathVariable Long id,
+            @RequestPart(name = "employee") EmployeeUpdateRequest updateRequest,
+            @RequestPart(name = "profile", required = false) MultipartFile file) {
+
+        String ip = request.getRemoteAddr();
+        return ResponseEntity.ok(employeeService.update(id, updateRequest, file, ip));
+    }
+
 }

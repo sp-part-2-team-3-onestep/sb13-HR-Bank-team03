@@ -17,9 +17,6 @@ public class FileMeta extends Base {
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Column(name = "save_path", nullable = false)
-    private String savePath;
-
     @Column(name = "file_type", nullable = false)
     private String fileType;
 
@@ -27,11 +24,10 @@ public class FileMeta extends Base {
     private Long fileSize;
 
     @Builder
-    public FileMeta(String fileName, String savePath,
-                    String fileType, Long fileSize,
-                    EmployeeStatus status) {
+    public FileMeta(String fileName,
+        String fileType,
+        Long fileSize) {
         this.fileName = fileName;
-        this.savePath = savePath;
         this.fileType = fileType;
         this.fileSize = fileSize;
     }

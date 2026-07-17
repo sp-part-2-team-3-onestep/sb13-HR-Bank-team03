@@ -10,9 +10,18 @@ import static org.springframework.http.HttpStatus.*;
 @RestControllerAdvice
 public class ExceptionController {
 
+    /**
+     * ExceptionHandler 가 비어있으면 에러 납니다.
+     * 에러를 추가 할 때, 주석을 풀어서 사용 해 주세요!
+     */
+
+
     // status code - 400 error
     @ExceptionHandler({
-
+            DepartmentNameDuplicateException.class,
+            EmployeeDuplicateException.class,
+            BackupHistoryStatusException.class,
+            LocalDateFormatException.class
     })
     public ProblemDetail BadRequestException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
@@ -24,7 +33,9 @@ public class ExceptionController {
 
     // status code - 404 error
     @ExceptionHandler({
-
+            DepartmentNotExistException.class,
+            EmployeeNotExistException.class,
+            FileNotExistException.class
     })
     public ProblemDetail NotFoundException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
@@ -35,7 +46,7 @@ public class ExceptionController {
 
     // status code - 409 error
     @ExceptionHandler({
-
+        BackupHistoryAlreadyRunningExcption.class
     })
     public ProblemDetail ConflictException(BaseException e, WebRequest request) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());

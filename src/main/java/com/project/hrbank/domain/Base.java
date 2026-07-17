@@ -8,9 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
-@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter(AccessLevel.PROTECTED)
+@Getter
 @MappedSuperclass
 public class Base {
     @Id

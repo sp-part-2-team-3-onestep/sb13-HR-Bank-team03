@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 // 부서엔터티
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Department extends Base {
 
@@ -19,11 +21,11 @@ public class Department extends Base {
     private String departmentName;
 
     // 부서 설명란
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     // 부서 설립일
-    @Column
+    @Column(nullable = false)
     private LocalDate establishedDate;
 
     // 부서 삭제 날짜와 시간
@@ -31,9 +33,9 @@ public class Department extends Base {
     private Instant deletedAt;
 
     public Department(
-            String departmentName,
-            String description,
-            LocalDate establishedDate
+        String departmentName,
+        String description,
+        LocalDate establishedDate
     ){
         this.departmentName = departmentName;
         this.description = description;
@@ -43,4 +45,17 @@ public class Department extends Base {
     public void delete() {
         this.deletedAt = Instant.now();
     }
+
+    @Override
+    public String toString() {
+        return "Department{" +
+                "departmentName='" + departmentName + '\'' +
+                ", description='" + description + '\'' +
+                ", establishedDate=" + establishedDate +
+                ", deletedAt=" + deletedAt +
+                '}';
+    }
+
+
+    //[ Diff{}, Diff{}] -> [Diff@0x123,Diff@0x123]
 }

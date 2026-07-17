@@ -6,16 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.time.LocalDate;
+
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Employee extends Base {
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
@@ -29,18 +32,20 @@ public class Employee extends Base {
     private String position;
 
     @Column(nullable = false)
-    private Instant hireDate;
+    private LocalDate hireDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private EmployeeStatus status;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "profile_imaged_id")
     private FileMeta profileImaged;
 
+    private Instant deletedAt;
+
     public static Employee create(String name, Department department, String employeeNumber,
-                                  String email, String position, Instant hireDate,
+                                  String email, String position, LocalDate hireDate,
                                   EmployeeStatus status, FileMeta profileImaged) {
         Employee employee = new Employee();
         employee.name = name;
@@ -55,7 +60,7 @@ public class Employee extends Base {
     }
 
     public void update(String name, Department department, String email, String position,
-                       Instant hireDate, EmployeeStatus status, FileMeta profileImaged) {
+                       LocalDate hireDate, EmployeeStatus status, FileMeta profileImaged, Instant deletedAt) {
         this.name = name;
         this.department = department;
         this.email = email;
@@ -63,5 +68,6 @@ public class Employee extends Base {
         this.hireDate = hireDate;
         this.status = status;
         this.profileImaged = profileImaged;
+        this.deletedAt = deletedAt;
     }
 }
