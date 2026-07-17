@@ -90,12 +90,13 @@ public class QDSLBackupHistoryRepositoryImpl implements QDSLBackupHistoryReposit
 
     private BackupStatus getBackupHistoryStatus(String status){
         if (status == null) return null;
-        switch (status){
-            case "COMPLETED" -> { return BackupStatus.DONE; }
-            case "FAILED" -> { return BackupStatus.FAIL; }
-            case "IN_PROGRESS" -> { return BackupStatus.RUNNING; }
+        return switch (status){
+            case "COMPLETED" -> BackupStatus.DONE;
+            case "FAILED" -> BackupStatus.FAIL;
+            case "IN_PROGRESS" -> BackupStatus.RUNNING;
+            case "SKIPPED" -> BackupStatus.SKIP;
             default -> throw new BackupHistoryStatusException("잘못된 요청입니다","not current request");
-        }
+        };
     }
 
 
