@@ -13,6 +13,35 @@
 |**Database&ORM**|![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white) ![H2 DATABASE](https://img.shields.io/badge/H2-09476B?style=for-the-badge&logo=h2database&logoColor=white)|
 |**Documentation**|![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)|
 |**배포 및 협업**|![Railway](https://img.shields.io/badge/Railway-13111C?style=for-the-badge&logo=railway&logoColor=white) ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)|
+
+## 아키텍처
+```
+Client (HTML/CSS/JS)
+        │  HTTP Request (REST API)
+        ▼
+┌─────────────────────────────────┐
+│         Spring Boot             │
+│                                 │
+│  Controller                     │
+│      │                          │
+│  Service                        │
+│      │                          │
+│  Repository                     │
+│   ├─ Spring Data JPA            │
+│   └─ QueryDSL (동적 검색/커서 페이징)│
+│      │                          │
+│  MapStruct (DtoMapper)          │
+│   Entity ↔ DTO 변환              │
+└─────────────────────────────────┘
+        │
+        ▼
+   Database
+ ┌────────────┬──────────────┐
+ │ PostgreSQL │  H2 (로컬)    │
+ │  (운영)     │  (개발/테스트)  │
+ └────────────┴──────────────┘
+```
+
 ## 팀원 소개
 |팀장|팀원|팀원|팀원|팀원|팀원|
 |:-:|:-:|:-:|:-:|:-:|:-:|
