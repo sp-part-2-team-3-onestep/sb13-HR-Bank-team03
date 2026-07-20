@@ -42,6 +42,264 @@ Client (HTML/CSS/JS)
  └────────────┴──────────────┘
 ```
 
+## JPQL
+```
+@Override
+    public List<Employee> searchByCursor(EmployeeSearchRequest request) {
+
+        StringBuilder jpql =
+                new StringBuilder("SELECT e FROM Employee e WHERE e.deletedAt IS NULL ");
+        String field;
+
+        // 이름 또는 이메일 검색
+        if (StringUtils.hasText(request.nameOrEmail())) {
+            jpql.append("""
+                    AND (
+                        LOWER(e.name) LIKE LOWER(:nameOrEmail)
+                        OR LOWER(e.email) LIKE LOWER(:nameOrEmail)
+                    )
+                    """);
+        }
+
+        // 상태
+        if (request.status() != null) {
+            jpql.append("""
+                    AND e.status = :status
+                    """);
+        }
+
+        // 사원번호
+        if (StringUtils.hasText(request.employeeNumber())) {
+            jpql.append("""
+                    AND LOWER(e.employeeNumber)
+                    LIKE LOWER(CONCAT('%', :employeeNumber, '%'))
+                    """);
+        }
+
+        // 부서명
+        if (StringUtils.hasText(request.departmentName())) {
+            jpql.append("""
+                    AND LOWER(e.department.departmentName)
+                    LIKE LOWER(CONCAT('%', :departmentName, '%'))
+                    """);
+        }
+
+        // 직함
+        if (StringUtils.hasText(request.position())) {
+            jpql.append("""
+                    AND LOWER(e.position)
+                    LIKE LOWER(CONCAT('%', :position, '%'))
+                    """);
+        }
+
+        // 입사 시작일
+        if (request.hireDateFrom() != null) {
+            jpql.append("AND e.hireDate >= :hireDateFrom ");
+        }
+
+        // 입사 종료일
+        if (request.hireDateTo() != null) {
+            jpql.append("AND e.hireDate <= :hireDateTo ");
+        }
+
+
+        // 정렬 기준
+        if ("name".equalsIgnoreCase(request.sortField())) {
+            field = "e.name";
+        } else if ("employeeNumber".equalsIgnoreCase(request.sortField())) {
+            field = "e.employeeNumber";
+        } else {
+            field = "e.hireDate";
+        }
+
+        String direction = "asc".equalsIgnoreCase(request.sortDirection()) ? "ASC" : "DESC";
+
+
+        // Cursor 조건 - idAfter는 있으면 쓰고, 없어도 cursor만으로 동작해야 함
+        boolean hasCursor = StringUtils.hasText(request.cursor());
+        boolean hasIdAfter = request.idAfter() != null;
+
+        if (hasCursor) {
+            String operator = "ASC".equals(direction) ? ">" : "<";
+
+            if (hasIdAfter) {
+                jpql.append("AND (")
+                        .append(field).append(" ")
+                        .append(operator)
+                        .append(" :cursor ")
+                        .append("OR (")
+                        .append(field)
+                        .append(" = :cursor ")
+                        .append("AND e.id ")
+                        .append(operator)
+                        .append(" :idAfter)) ");
+            } else {
+                jpql.append("AND ")
+                        .append(field)
+                        .append(" ")
+                        .append(operator)
+                        .append(" :cursor ");
+            }
+        }
+
+        // 정렬
+        jpql.append("ORDER BY ")
+                .append(field)
+                .append(" ")
+                .append(direction)
+                .append(", e.id ")
+                .append(direction);
+
+        TypedQuery<Employee> query =
+                em.createQuery(jpql.toString(), Employee.class);
+
+
+        if (StringUtils.hasText(request.nameOrEmail())) {
+            query.setParameter("nameOrEmail", "%" + request.nameOrEmail() + "%");
+        }
+
+        if (request.status() != null) {
+            query.setParameter("status", request.status());
+        }
+
+        if (StringUtils.hasText(request.employeeNumber())) {
+            query.setParameter("employeeNumber", request.employeeNumber());
+        }
+
+        if (StringUtils.hasText(request.departmentName())) {
+            query.setParameter("departmentName", request.departmentName());
+        }
+
+        if (StringUtils.hasText(request.position())) {
+            query.setParameter("position", request.position());
+        }
+
+        if (request.hireDateFrom() != null) {
+            query.setParameter("hireDateFrom", request.hireDateFrom());
+        }
+
+        if (request.hireDateTo() != null) {
+            query.setParameter("hireDateTo", request.hireDateTo());
+        }
+
+
+        if (hasCursor) {
+            if ("hireDate".equalsIgnoreCase(request.sortField())) {
+                query.setParameter("cursor", LocalDate.parse(request.cursor()));
+            } else {
+                query.setParameter("cursor", request.cursor());
+            }
+
+            if (hasIdAfter) {
+                query.setParameter("idAfter", request.idAfter());
+            }
+        }
+
+        query.setMaxResults(request.size() + 1);
+
+        return query.getResultList();
+    }
+
+
+    @Override
+    public long countEmployees() {
+        String sql = "SELECT COUNT(e) FROM Employee e WHERE e.deletedAt IS NULL";
+        return em.createQuery(sql, Long.class)
+                .getSingleResult();
+    }
+```
+
+## QueryDSL
+```
+public Slice<BackupHistory> backupHistory(
+            BackupHistorySearchRequest req,
+            int pageSize,
+            String sort,
+            String direction
+
+    ) {
+
+        boolean desc = direction.equalsIgnoreCase("desc");
+
+        BooleanBuilder where = new BooleanBuilder();
+
+        where.and(workerExpression(req.worker()));
+        where.and(timeExpression(req.startedAtFrom(),req.startedAtTo()));
+        where.and(typeExpression(getBackupHistoryStatus(req.status())));
+        // 커서 조건 형성
+        where.and(cursorExpression(desc,req.cursor(),sort));
+
+        List<BackupHistory> data = queryFactory.selectFrom(backupHistory)
+                .leftJoin(backupHistory.fileMeta, fileMeta).fetchJoin()
+                .where(where)
+                .orderBy(order(desc,sort))
+                .limit(pageSize + 1L)
+                .fetch();
+
+        boolean hasNext = data.size() > pageSize;
+        if (hasNext) data.remove(data.size()-1);
+
+        System.out.println(data);
+
+        return new SliceImpl<>(data, PageRequest.of(0,pageSize),hasNext);
+
+    }
+
+
+    private BooleanExpression workerExpression(String worker){
+        return worker == null ? null : backupHistory.ip.containsIgnoreCase(worker);
+    }
+
+    // 시간 범위 ->  시작보다 크거나 같고. 끝보다 작거나 같음
+    private BooleanExpression timeExpression(Instant start, Instant end){
+        if (start == null) return end == null ? null : backupHistory.startTime.loe(end);
+        return end == null ? backupHistory.startTime.goe(start) : backupHistory.startTime.between(start, end);
+    }
+
+    private BooleanExpression typeExpression(BackupStatus status){
+        return status == null ? null : backupHistory.backupStatus.eq(status);
+    }
+
+    private BooleanExpression cursorExpression(boolean desc, String cursor, String field) {
+        if (cursor == null) return null;
+        Instant time = Instant.parse(cursor);
+        // startedAt and endedAt
+        if (field.equals("endedAt")) return desc ? backupHistory.endTime.lt(time) : backupHistory.endTime.gt(time);
+        return desc ? backupHistory.startTime.lt(time) : backupHistory.startTime.gt(time);
+    }
+
+    private OrderSpecifier<?> order(boolean desc,String field) {
+        if (field.equals("endedAt")) return desc ? backupHistory.endTime.desc() : backupHistory.endTime.asc();
+        return desc ? backupHistory.startTime.desc() : backupHistory.startTime.asc();
+    }
+
+
+    private BackupStatus getBackupHistoryStatus(String status){
+        if (status == null) return null;
+        switch (status){
+            case "COMPLETED" -> { return BackupStatus.DONE; }
+            case "FAILED" -> { return BackupStatus.FAIL; }
+            case "IN_PROGRESS" -> { return BackupStatus.RUNNING; }
+            default -> throw new BackupHistoryStatusException("잘못된 요청입니다","not current request");
+        }
+    }
+```
+
+### application.yaml
+```
+datasource:
+  url: jdbc:postgresql://localhost:5432/hrbank
+  username: onestep
+  password: 1234
+  driver-class-name: org.postgresql.Driver
+
+datasource:
+  url: jdbc:h2:tcp://localhost/~/test
+  username: sa
+  password:
+  driver-class-name: org.h2.Driver
+```
+
 ## 팀원 소개
 |팀장|팀원|팀원|팀원|팀원|팀원|
 |:-:|:-:|:-:|:-:|:-:|:-:|
