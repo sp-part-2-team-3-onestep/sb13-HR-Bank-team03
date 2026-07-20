@@ -33,9 +33,9 @@ public class Department extends Base {
     private Instant deletedAt;
 
     public Department(
-            String departmentName,
-            String description,
-            LocalDate establishedDate
+        String departmentName,
+        String description,
+        LocalDate establishedDate
     ){
         this.departmentName = departmentName;
         this.description = description;
@@ -45,4 +45,17 @@ public class Department extends Base {
     public void delete() {
         this.deletedAt = Instant.now();
     }
+
+    @Override
+    public String toString() {
+        return "Department{" +
+                "departmentName='" + departmentName + '\'' +
+                ", description='" + description + '\'' +
+                ", establishedDate=" + establishedDate +
+                ", deletedAt=" + deletedAt +
+                '}';
+    }
+
+
+    //[ Diff{}, Diff{}] -> [Diff@0x123,Diff@0x123]
 }

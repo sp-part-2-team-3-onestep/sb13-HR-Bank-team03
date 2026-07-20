@@ -7,11 +7,14 @@ plugins {
 group = 'com.project'
 version = '0.0.1-SNAPSHOT'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
+// java {
+// 	toolchain {
+// 		languageVersion = JavaLanguageVersion.of(17)
+// 	}
+// }
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -23,6 +26,12 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
+
+	// Querydsl
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 
 	// H2 데이터베이스
 	runtimeOnly 'com.h2database:h2'
@@ -38,6 +47,26 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 }
 
+// Q클래스가 생성될 경로 지정 (보통 src/main/generated 사용)
+def generatedDir = 'src/main/generated'
+
+tasks.withType(JavaCompile) {
+	options.generatedSourceOutputDirectory = file(generatedDir)
+}
+
+// clean 시 생성된 Q클래스 폴더 삭제
+clean {
+	delete file(generatedDir)
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+bootJar {
+    enabled = true
+	archiveFileName = 'app.jar'
+}
+jar {
+    enabled = false // plain.jar 생성을 막아 Railway가 헷갈리지 않게 합니다.
 }

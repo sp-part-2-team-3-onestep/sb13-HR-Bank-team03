@@ -1,5 +1,6 @@
 HELP.md
 .gradle
+.DS_Store
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -36,6 +37,9 @@ out/
 ### VS Code ###
 .vscode/
 
-
+gradle.properties
 .storage
 storage
+
+# queryDsl 클래스 폴더
+src/main/generated

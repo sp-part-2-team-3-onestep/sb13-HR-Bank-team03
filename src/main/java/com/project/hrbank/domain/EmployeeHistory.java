@@ -5,11 +5,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "employee_history")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class EmployeeHistory extends Base{
+public class EmployeeHistory extends Base {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
@@ -31,14 +33,14 @@ public class EmployeeHistory extends Base{
 
     @Column(name = "ip_address", nullable = false)
     private String ipAddress;
-
-    public EmployeeHistory(Employee employee,
-                           Department department,
-                           EmployeeHistoryType type,
-                           String changeDetail,
-                           String memo,
-                           String ipAddress) {
-
+    public EmployeeHistory(
+            Employee employee,
+            Department department,
+            EmployeeHistoryType type,
+            String changeDetail,
+            String memo,
+            String ipAddress
+    ) {
         this.employee = employee;
         this.department = department;
         this.type = type;
@@ -46,4 +48,31 @@ public class EmployeeHistory extends Base{
         this.memo = memo;
         this.ipAddress = ipAddress;
     }
+
+    public Long getHistoryId() {
+        return super.getId();
+    }
+
+    public Long getEmployeeId() {
+        return employee.getId();
+    }
+
+    public String getEmployeeName() {
+        return employee.getName();
+    }
+
+    public Long getDepartmentId() {
+        return department.getId();
+    }
+
+    public String getDepartmentName() {
+        return department.getDepartmentName();
+    }
+
+    public Instant getCreatedAt() {
+        return super.getCreateAt();
+    }
+
+    public String getTypeString(){ return type.toString(); }
+
 }
